@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/configDialog">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/siteText"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <CheckBox
+            android:layout_weight=".5"
+            android:padding="3dp"
+            android:id="@+id/addUppercaseCheckBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Add Uppercase"/>
+
+        <CheckBox
+            android:layout_weight=".5"
+            android:padding="3dp"
+            android:id="@+id/addSpecialCharsCheckBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Add Special Chars"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <CheckBox
+
+            android:layout_weight=".3"
+            android:id="@+id/setMaxLengthCheckBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+
+            android:text="Set Max Length"/>
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".7"
+                android:id="@+id/maxLengthEditText"
+                android:hint="set max"
+                android:text="32"
+                android:inputType="number"/>
+
+    </LinearLayout>
+</LinearLayout>
