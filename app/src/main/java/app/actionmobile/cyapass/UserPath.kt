@@ -17,10 +17,13 @@ object UserPath {
 
     public fun init(){
         allSegments = HashSet<Segment>()
+        allPoints = ArrayList<Point>(0)
         currentPoint = null
         PointValue = 0
         previousPostValue = 0
+
     }
+
     fun append(currentPoint: Point, postValue: Int) {
         this.currentPoint = currentPoint
 
