@@ -46,15 +46,15 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight=".2"
-            android:id="@+id/password"
-            android:hint="password"
-            android:paddingBottom="25dp"
-            android:layout_marginTop="-10dp"
-            android:textIsSelectable="true"
-            />
+                android:id="@+id/password"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-10dp"
+                android:layout_weight=".8"
+                android:hint="password"
+                android:paddingTop="12dp"
+                android:paddingBottom="25dp"
+                android:textIsSelectable="true" />
         <CheckBox
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -62,19 +62,27 @@
             android:text="Show Pwd"
             android:id="@+id/showPwd"
             android:textSize="5pt"/>
-        <CheckBox
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Hide Pattern"
-            android:layout_weight=".35"
-            android:id="@+id/hidePatternCheckBox"/>
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight=".25"
-            android:text="Clear"
-            android:id="@+id/clearGrid"/>
 
+    </LinearLayout>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <CheckBox
+                android:id="@+id/hidePatternCheckBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".35"
+                android:text="Hide Pattern" />
+
+        <Button
+                android:id="@+id/clearGrid"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".25"
+                android:text="Clear" />
     </LinearLayout>
 
     <android.support.constraint.ConstraintLayout
