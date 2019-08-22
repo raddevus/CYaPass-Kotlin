@@ -566,13 +566,9 @@ class MainActivity : AppCompatActivity() {
                         editSite()
                         true
                     })
-
-                    siteSpinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                        override fun onItemSelected(
-                            parentView: AdapterView<*>,
-                            selectedItemView: View,
-                            position: Int,
-                            id: Long
+                    siteSpinner!!.onItemSelectedListener =  object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(parent: AdapterView<*>?,
+                                    view: View?, position: Int, id: Long
                         ) {
                             if (siteSpinner!!.selectedItemPosition <= 0) {
                                 currentSiteKey = null
