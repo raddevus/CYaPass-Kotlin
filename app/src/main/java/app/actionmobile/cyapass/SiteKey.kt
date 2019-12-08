@@ -1,5 +1,7 @@
 package app.actionmobile.cyapass
 
+import android.util.Base64
+import android.util.Base64.*
 import android.util.Log
 
 import com.google.gson.Gson
@@ -32,14 +34,14 @@ class SiteKey {
         hasMaxLength: Boolean,
         maxLength: Int
     ) {
-        this.key = key
+        this.key = encode(key.toByteArray(), Base64.DEFAULT).toString()
         this.isHasSpecialChars = hasSpecialChars
         this.isHasUpperCase = hasUpperCase
         this.maxLength = maxLength
     }
 
     override fun toString(): String {
-        return this.key
+        return decode(this.key,Base64.DEFAULT).toString()
     }
 
     companion object {
