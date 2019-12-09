@@ -906,8 +906,8 @@ class MainActivity : AppCompatActivity() {
                 initializeSpinnerAdapter(vx)
                 val sites = sitePrefs.getString("sites", "")
 //                #### following two lines
-                sitePrefs.edit().clear().apply()
-                sitePrefs.edit().commit()
+//                sitePrefs.edit().clear().apply()
+//                sitePrefs.edit().commit()
                 val gson = Gson()
                 try {
                     allSiteKeys = gson.fromJson<Any>(sites, object : TypeToken<List<SiteKey>>()
