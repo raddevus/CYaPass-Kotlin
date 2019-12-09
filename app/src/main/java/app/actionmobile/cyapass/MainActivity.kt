@@ -43,6 +43,7 @@ import java.util.ArrayList
 import java.util.Comparator
 import java.util.UUID
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 
 class MainActivity : AppCompatActivity() {
@@ -337,7 +338,7 @@ class MainActivity : AppCompatActivity() {
 
                     allSiteKeys!!.add(originalLocation, currentSiteKey!!)
                     spinnerAdapter!!.notifyDataSetChanged()
-                    val gson = Gson()
+                    val gson = GsonBuilder().disableHtmlEscaping().create()
                     outValues = gson.toJson(allSiteKeys, allSiteKeys!!.javaClass)
 
                     edit.putString("sites", outValues)
@@ -405,7 +406,7 @@ class MainActivity : AppCompatActivity() {
                     )
 
                     allSiteKeys!!.add(currentSiteKey!!)
-                    val gson = Gson()
+                    val gson = GsonBuilder().disableHtmlEscaping().create()
                     outValues = gson.toJson(allSiteKeys, allSiteKeys!!.javaClass)
                     edit.putString("sites", outValues)
                     edit.commit()
@@ -905,8 +906,8 @@ class MainActivity : AppCompatActivity() {
                 initializeSpinnerAdapter(vx)
                 val sites = sitePrefs.getString("sites", "")
 //                #### following two lines
-//                sitePrefs.edit().clear().apply()
-//                sitePrefs.edit().commit()
+                sitePrefs.edit().clear().apply()
+                sitePrefs.edit().commit()
                 val gson = Gson()
                 try {
                     allSiteKeys = gson.fromJson<Any>(sites, object : TypeToken<List<SiteKey>>()

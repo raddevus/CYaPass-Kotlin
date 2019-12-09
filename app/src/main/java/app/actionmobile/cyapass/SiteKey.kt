@@ -5,6 +5,7 @@ import android.util.Base64.*
 import android.util.Log
 
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -48,7 +49,8 @@ class SiteKey {
     companion object {
 
         fun toJson(sk: List<SiteKey>): String {
-            val gson = Gson()
+            val gson = GsonBuilder().disableHtmlEscaping().create()
+
             Log.d("MainActivity", "######################")
             Log.d("MainActivity", gson.toJson(sk))
             return gson.toJson(sk)
