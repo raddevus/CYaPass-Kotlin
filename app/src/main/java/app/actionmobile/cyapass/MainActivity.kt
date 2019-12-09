@@ -425,8 +425,8 @@ class MainActivity : AppCompatActivity() {
         private fun findSiteSpinnerItemByText(currentSiteKey: String): Int {
             Log.d("MainActivity", currentSiteKey)
             for (x in 0 until spinnerAdapter!!.getCount()) {
-                if (spinnerAdapter!!.getItem(x)!!.key.equals(currentSiteKey)) {
-                    Log.d("MainActivity", spinnerAdapter!!.getItem(x)!!.key)
+                if (spinnerAdapter!!.getItem(x).toString()!!.equals(currentSiteKey)) {
+                    Log.d("MainActivity", spinnerAdapter!!.getItem(x)!!.toString())
                     return x
                 }
             }
@@ -651,7 +651,7 @@ class MainActivity : AppCompatActivity() {
                         } else {
                             AlertDialog.Builder(view.context)
                                 .setTitle("Delete site?")
-                                .setMessage("Are you sure you want to delete this site : ${currentSiteKey!!.key}?")
+                                .setMessage("Are you sure you want to delete this site : ${currentSiteKey!!.toString()}?")
                                 .setPositiveButton(
                                     R.string.yes_button,
                                     DialogInterface.OnClickListener { dialog, which ->
@@ -904,6 +904,9 @@ class MainActivity : AppCompatActivity() {
                 val sitePrefs = MainActivity.appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
                 initializeSpinnerAdapter(vx)
                 val sites = sitePrefs.getString("sites", "")
+//                #### following two lines
+//                sitePrefs.edit().clear().apply()
+//                sitePrefs.edit().commit()
                 val gson = Gson()
                 try {
                     allSiteKeys = gson.fromJson<Any>(sites, object : TypeToken<List<SiteKey>>()

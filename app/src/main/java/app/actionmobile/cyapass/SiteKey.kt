@@ -25,7 +25,7 @@ class SiteKey {
         private set
 
     constructor(key: String) {
-        this.key = key
+        this.key = encodeToString(key.toByteArray(), Base64.NO_WRAP)
     }
 
     constructor(
@@ -34,14 +34,15 @@ class SiteKey {
         hasMaxLength: Boolean,
         maxLength: Int
     ) {
-        this.key = encode(key.toByteArray(), Base64.DEFAULT).toString()
+        this.key = encodeToString(key.toByteArray(), Base64.NO_WRAP)
         this.isHasSpecialChars = hasSpecialChars
         this.isHasUpperCase = hasUpperCase
         this.maxLength = maxLength
     }
 
     override fun toString(): String {
-        return decode(this.key,Base64.DEFAULT).toString()
+        var decodedBytes : ByteArray  = decode(this.key,Base64.NO_WRAP)
+       return decodedBytes.toString(Charsets.ISO_8859_1)
     }
 
     companion object {
