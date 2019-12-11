@@ -735,14 +735,17 @@ class MainActivity : AppCompatActivity() {
                     importSiteKeysButton!!.setOnClickListener {
                         Log.d("MainActivity", "import button clicked!")
                         val queue = Volley.newRequestQueue(it.context)
-                        val url = "http://raddev.us"
+                        val url = "http://raddev.us/allsitekeys.json"
 
 // Request a string response from the provided URL.
                         val stringRequest = StringRequest(
                             Request.Method.GET, url,
                             Response.Listener<String> { response ->
                                 // Display the first 500 characters of the response string.
-                                Log.d("MainActivity","Response is: ${response.substring(0, 500)}")
+                                Log.d("MainActivity", "URL returned...")
+                                //Log.d("MainActivity","Response is: ${response.substring(0, 500)}")
+                                Log.d("MainActivity","Response is: ${response}")
+                                deserializeSiteKeys(response)
                             },
                             Response.ErrorListener { Log.d("MainActivity", "That didn't work!")})
 
@@ -875,6 +878,40 @@ class MainActivity : AppCompatActivity() {
             }
 
             return rootView
+        }
+
+        fun deserializeSiteKeys(sites: String){
+            val gson = Gson()
+            try {
+                Log.d("MainActivity", "Attempting deserialization of JSON.")
+                allSiteKeys = gson.fromJson<Any>(sites, object : TypeToken<List<SiteKey>>()
+                {
+
+                }.type) as MutableList<SiteKey>
+                Log.d("MainActivity", "Deserialization SUCCESS!")
+                if (allSiteKeys == null) {
+                    allSiteKeys = ArrayList<SiteKey>()
+                }
+
+                for (sk in allSiteKeys!!) {
+                    spinnerAdapter!!.add(sk)
+                }
+                spinnerAdapter!!.sort { a1, a2 -> a1.toString().compareTo(a2.toString(), true) }
+                spinnerAdapter!!.insert(SiteKey("select site"), 0)
+
+                spinnerAdapter!!.notifyDataSetChanged()
+            } catch (x: Exception) {
+                Log.d("MainActivity", x.message)
+                val allSites = sites!!.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                Log.d("MainActivity", "sites : $sites")
+                Log.d("MainActivity", "Reading items from prefs")
+                for (s in allSites) {
+                    Log.d("MainActivity", "s : $s")
+                    if (s !== "") {
+                        spinnerAdapter!!.add(SiteKey(s))
+                    }
+                }
+            }
         }
 
         fun InitializeDeviceSpinner(btDeviceSpinner: Spinner) {
