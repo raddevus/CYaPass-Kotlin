@@ -38,6 +38,10 @@ import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.Spinner
 import android.widget.TextView
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 
 import java.util.ArrayList
 import java.util.Comparator
@@ -490,12 +494,14 @@ class MainActivity : AppCompatActivity() {
                     addCharsTabCheckBox = settingsView!!.findViewById(R.id.addCharsTabCheckBox) as CheckBox
                     maxLengthTabCheckBox = settingsView!!.findViewById(R.id.maxLengthTabCheckBox) as CheckBox
                     maxLengthTabEditText = settingsView!!.findViewById(R.id.maxLengthTabEditText) as EditText
+                    importSiteKeysButton = settingsView!!.findViewById(R.id.importSiteKeysButton) as Button
                 }
                 2 -> {
                     addUpperCaseTabCheckBox = rootView!!.findViewById(R.id.addUCaseTabCheckBox) as CheckBox
                     addCharsTabCheckBox = rootView!!.findViewById(R.id.addCharsTabCheckBox) as CheckBox
                     maxLengthTabCheckBox = rootView!!.findViewById(R.id.maxLengthTabCheckBox) as CheckBox
                     maxLengthTabEditText = rootView!!.findViewById(R.id.maxLengthTabEditText) as EditText
+                    importSiteKeysButton = rootView!!.findViewById(R.id.importSiteKeysButton) as Button
                 }
             }
             if (currentSiteKey != null) {
@@ -704,6 +710,7 @@ class MainActivity : AppCompatActivity() {
                     specialCharsText = rootView!!.findViewById(R.id.specialCharsTabTextBox) as EditText
                     sendCtrlAltDelCheckbox = rootView!!.findViewById(R.id.sendCtrlAltDel) as CheckBox
                     sendEnterCheckbox = rootView!!.findViewById(R.id.sendEnter) as CheckBox
+                    importSiteKeysButton = rootView!!.findViewById(R.id.importSiteKeysButton) as Button
 
                     sendEnterCheckbox.isChecked = true
                     maxLengthTabEditText!!.setText("32")
@@ -725,6 +732,24 @@ class MainActivity : AppCompatActivity() {
                         //DiscoverAvailableDevices();
                     }
 
+                    importSiteKeysButton!!.setOnClickListener {
+                        Log.d("MainActivity", "import button clicked!")
+                        val queue = Volley.newRequestQueue(it.context)
+                        val url = "http://raddev.us"
+
+// Request a string response from the provided URL.
+                        val stringRequest = StringRequest(
+                            Request.Method.GET, url,
+                            Response.Listener<String> { response ->
+                                // Display the first 500 characters of the response string.
+                                Log.d("MainActivity","Response is: ${response.substring(0, 500)}")
+                            },
+                            Response.ErrorListener { Log.d("MainActivity", "That didn't work!")})
+
+// Add the request to the RequestQueue.
+                        queue.add(stringRequest)
+
+                    }
 
                     sendEnterCheckbox.setOnClickListener {
                         if (sendEnterCheckbox.isChecked) {
@@ -884,6 +909,7 @@ class MainActivity : AppCompatActivity() {
             private var addUpperCaseTabCheckBox: CheckBox? = null
             private var maxLengthTabCheckBox: CheckBox? = null
             private var maxLengthTabEditText: EditText? = null
+            private var importSiteKeysButton: Button? = null
 
             internal var hidePatternCheckbox: CheckBox? = null
 
