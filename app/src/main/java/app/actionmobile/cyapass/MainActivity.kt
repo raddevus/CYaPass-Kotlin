@@ -889,13 +889,25 @@ class MainActivity : AppCompatActivity() {
 
                 }.type) as MutableList<SiteKey>
                 Log.d("MainActivity", "Deserialization SUCCESS!")
+                Log.d("MainActivity", "There are ${allSiteKeys!!.size} sitekeys.")
                 if (allSiteKeys == null) {
                     allSiteKeys = ArrayList<SiteKey>()
                 }
-
+                var isFound : Boolean = false
                 for (sk in allSiteKeys!!) {
-
-                    spinnerAdapter!!.add(sk)
+                    isFound = false
+                    Log.d("MainActivity","spinnerAdapter!!.count : ${spinnerAdapter!!.count}")
+                    for (i in 1..spinnerAdapter!!.count){
+                        Log.d("MainActivity", "i : ${i}")
+                        if (spinnerAdapter!!.getItem(i-1)!!.key.equals(sk.key)) {
+                            Log.d("MainActivity","Found item: ${sk.key.toString()}" )
+                            isFound = true;
+                            continue
+                        }
+                    }
+                    if (!isFound) {
+                        spinnerAdapter!!.add(sk)
+                    }
                 }
                 spinnerAdapter!!.sort { a1, a2 -> a1.toString().compareTo(a2.toString(), true) }
                 if (spinnerAdapter!!.getItem(0)?.key.toString() != "select site") {
