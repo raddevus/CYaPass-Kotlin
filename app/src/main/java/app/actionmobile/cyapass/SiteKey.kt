@@ -30,7 +30,8 @@ class SiteKey {
     }
 
     constructor(
-        key: String, hasSpecialChars: Boolean,
+        key: String,
+        hasSpecialChars: Boolean,
         hasUpperCase: Boolean,
         hasMaxLength: Boolean,
         maxLength: Int

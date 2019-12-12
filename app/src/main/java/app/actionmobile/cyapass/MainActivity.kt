@@ -894,10 +894,13 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 for (sk in allSiteKeys!!) {
+
                     spinnerAdapter!!.add(sk)
                 }
                 spinnerAdapter!!.sort { a1, a2 -> a1.toString().compareTo(a2.toString(), true) }
-                spinnerAdapter!!.insert(SiteKey("select site"), 0)
+                if (spinnerAdapter!!.getItem(0)?.key.toString() != "select site") {
+                    spinnerAdapter!!.insert(SiteKey("select site"), 0)
+                }
 
                 spinnerAdapter!!.notifyDataSetChanged()
             } catch (x: Exception) {
