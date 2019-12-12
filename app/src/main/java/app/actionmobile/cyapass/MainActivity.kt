@@ -735,8 +735,8 @@ class MainActivity : AppCompatActivity() {
                     importSiteKeysButton!!.setOnClickListener {
                         Log.d("MainActivity", "import button clicked!")
                         val queue = Volley.newRequestQueue(it.context)
-                        val url = "http://raddev.us/allsitekeys.json"
-
+                        //val url = "http://raddev.us/allsitekeys.json"
+                        val url = "https://newlibre.com/allsitekeys.json"
 // Request a string response from the provided URL.
                         val stringRequest = StringRequest(
                             Request.Method.GET, url,
