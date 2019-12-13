@@ -557,7 +557,7 @@ class MainActivity : AppCompatActivity() {
                     maxLengthTabCheckBox = settingsView!!.findViewById(R.id.maxLengthTabCheckBox) as CheckBox
                     maxLengthTabEditText = settingsView!!.findViewById(R.id.maxLengthTabEditText) as EditText
                     hidePatternCheckbox = rootView!!.findViewById(R.id.hidePatternCheckBox) as CheckBox
-                    loadSitesFromPrefs(rootView!!)
+                    //2019-12-13 -- is it necessary to call this twice? loadSitesFromPrefs(rootView!!)
 
                     addSiteButton.requestFocus()
 
@@ -888,7 +888,7 @@ class MainActivity : AppCompatActivity() {
             val gson = Gson()
             try {
                 Log.d("MainActivity", "Attempting deserialization of JSON.")
-                var allSiteKeys = gson.fromJson<Any>(sites, object : TypeToken<List<SiteKey>>()
+                allSiteKeys = gson.fromJson<Any>(sites, object : TypeToken<List<SiteKey>>()
                 {
 
                 }.type) as MutableList<SiteKey>
@@ -928,8 +928,8 @@ class MainActivity : AppCompatActivity() {
                 spinnerAdapter!!.insert(SiteKey("select site"), 0)
 
                 spinnerAdapter!!.notifyDataSetChanged()
-                MainActivity.clearAllUserPrefs()
-                SaveValuesToPrefs(allSiteKeys);
+//                MainActivity.clearAllUserPrefs()
+                SaveValuesToPrefs();
             } catch (x: Exception) {
                 Log.d("MainActivity", x.message)
                 val allSites = sites!!.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
@@ -944,15 +944,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        fun SaveValuesToPrefs(allSiteKeys : MutableList<SiteKey>?){
+        fun SaveValuesToPrefs(){
             val sites = MainActivity.appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
 
             Log.d("MainActivity", sites.getString("sites", ""))
             val edit = sites.edit()
             val gson = GsonBuilder().disableHtmlEscaping().create()
             val outValues = gson.toJson(allSiteKeys, allSiteKeys!!.javaClass)
-            edit.putString("sites", outValues)
+            edit.putString("sites", outValues).apply()
             edit.commit()
+
         }
 
         fun InitializeDeviceSpinner(btDeviceSpinner: Spinner) {
