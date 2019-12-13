@@ -736,7 +736,8 @@ class MainActivity : AppCompatActivity() {
                         Log.d("MainActivity", "import button clicked!")
                         val queue = Volley.newRequestQueue(it.context)
                         //val url = "http://raddev.us/allsitekeys.json"
-                        val url = "https://newlibre.com/allsitekeys.json"
+                        //val url = "https://newlibre.com/allsitekeys.json"
+                        val url = "https://newlibre.com/oneSiteKey.json"
 // Request a string response from the provided URL.
                         val stringRequest = StringRequest(
                             Request.Method.GET, url,
@@ -888,15 +889,23 @@ class MainActivity : AppCompatActivity() {
             val gson = Gson()
             try {
                 Log.d("MainActivity", "Attempting deserialization of JSON.")
+                allSiteKeys!!.clear()
                 allSiteKeys = gson.fromJson<Any>(sites, object : TypeToken<List<SiteKey>>()
                 {
 
                 }.type) as MutableList<SiteKey>
 
-                // determine if item is already in spinner, if so, don't add.
+                // if item is in spinner but not in allSiteKeys
+                // then add it back into allSiteKeys
+
+                // if item is already in spinner add it into allSiteKeys
                 for (itemCounter in 0..spinnerAdapter!!.count-1){
-                    if (!allSiteKeys!!.contains(spinnerAdapter!!.getItem(itemCounter))) {
+                    var x = allSiteKeys!!.find{
+                        it.toString().equals(spinnerAdapter!!.getItem(itemCounter).toString())
+                    }
+                    if (x == null) {
                         allSiteKeys!!.add(spinnerAdapter!!.getItem(itemCounter));
+                        Log.d("MainActivity", "Items in spinner -->  ${spinnerAdapter!!.getItem(itemCounter).toString()}")
                     }
                 }
 
@@ -928,7 +937,7 @@ class MainActivity : AppCompatActivity() {
                 spinnerAdapter!!.insert(SiteKey("select site"), 0)
 
                 spinnerAdapter!!.notifyDataSetChanged()
-//                MainActivity.clearAllUserPrefs()
+                MainActivity.clearAllUserPrefs()
                 SaveValuesToPrefs();
             } catch (x: Exception) {
                 Log.d("MainActivity", x.message)
@@ -947,10 +956,11 @@ class MainActivity : AppCompatActivity() {
         fun SaveValuesToPrefs(){
             val sites = MainActivity.appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
 
-            Log.d("MainActivity", sites.getString("sites", ""))
+            Log.d("MainActivity", "saveValuesToPrefs ${sites.getString("sites", "")}")
             val edit = sites.edit()
             val gson = GsonBuilder().disableHtmlEscaping().create()
             val outValues = gson.toJson(allSiteKeys, allSiteKeys!!.javaClass)
+            Log.d("MainActivity", "outValues -> ${outValues}")
             edit.putString("sites", outValues).apply()
             edit.commit()
 
@@ -1010,6 +1020,7 @@ class MainActivity : AppCompatActivity() {
                 val sitePrefs = MainActivity.appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
                 initializeSpinnerAdapter(vx)
                 val sites = sitePrefs.getString("sites", "")
+                Log.d("MainActivity", "sites : ${sites}")
 //                #### following two lines
 //                sitePrefs.edit().clear().apply()
 //                sitePrefs.edit().commit()
@@ -1019,6 +1030,7 @@ class MainActivity : AppCompatActivity() {
                     {
 
                     }.type) as MutableList<SiteKey>
+                    Log.d("MainActivity", "allSiteKeys.size : ${allSiteKeys!!.size}")
                     if (allSiteKeys == null) {
                         allSiteKeys = ArrayList<SiteKey>()
                     }
@@ -1119,10 +1131,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun clearAllUserPrefs() {
+            Log.d("MainActivity", "### clearAllUserPrefs() ###")
             val sites = appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
+            Log.d("MainActivity", "sites before: ${sites.getString("sites","")}")
             val edit = sites.edit()
             edit.clear().apply()
             edit.commit()
+            Log.d("MainActivity", "sites after: ${sites.getString("sites","")}")
 
             //PlaceholderFragment.loadSitesFromPrefs(v);
         }
