@@ -362,7 +362,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("MainActivity", "key 3 : ${currentSiteKey!!.key}")
             Log.d("MainActivity", "maxLength 3 : ${currentSiteKey!!.maxLength}")
             val input = v.findViewById(R.id.siteText) as EditText
-            input.setText(currentSiteKey!!.key)
+            input.setText(currentSiteKey!!.toString())
 
             Log.d("MainActivity", "EDIT!")
             ucCheckBox.isChecked = currentSiteKey!!.isHasUpperCase
@@ -565,7 +565,7 @@ class MainActivity : AppCompatActivity() {
                         currentSiteKey = siteSpinner!!.selectedItem as SiteKey
                         Log.d("MainActivity", "key 2 : ${currentSiteKey!!.key}")
                         Log.d("MainActivity", "maxLength 2 : ${currentSiteKey!!.maxLength}")
-                        if (currentSiteKey!!.key.equals("select site")) {
+                        if (currentSiteKey!!.toString().equals("select site")) {
                             return@OnLongClickListener false
                         }
                         Log.d("MainActivity", "LONGCLICK!!!")
@@ -881,25 +881,39 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun deserializeSiteKeys(sites: String){
+            //remove the "select site" item every time -- it's added back later
+            if (spinnerAdapter!!.count > 0) {
+                spinnerAdapter!!.remove(spinnerAdapter!!.getItem(0))
+            }
             val gson = Gson()
             try {
                 Log.d("MainActivity", "Attempting deserialization of JSON.")
-                allSiteKeys = gson.fromJson<Any>(sites, object : TypeToken<List<SiteKey>>()
+                var allSiteKeys = gson.fromJson<Any>(sites, object : TypeToken<List<SiteKey>>()
                 {
 
                 }.type) as MutableList<SiteKey>
+
+                // determine if item is already in spinner, if so, don't add.
+                for (itemCounter in 0..spinnerAdapter!!.count-1){
+                    if (!allSiteKeys!!.contains(spinnerAdapter!!.getItem(itemCounter))) {
+                        allSiteKeys!!.add(spinnerAdapter!!.getItem(itemCounter));
+                    }
+                }
+
                 Log.d("MainActivity", "Deserialization SUCCESS!")
                 Log.d("MainActivity", "There are ${allSiteKeys!!.size} sitekeys.")
                 if (allSiteKeys == null) {
                     allSiteKeys = ArrayList<SiteKey>()
                 }
+
                 var isFound : Boolean = false
+
                 for (sk in allSiteKeys!!) {
                     isFound = false
                     Log.d("MainActivity","spinnerAdapter!!.count : ${spinnerAdapter!!.count}")
-                    for (i in 1..spinnerAdapter!!.count){
+                    for (i in 0..spinnerAdapter!!.count-1){
                         Log.d("MainActivity", "i : ${i}")
-                        if (spinnerAdapter!!.getItem(i-1)!!.key.equals(sk.key)) {
+                        if (spinnerAdapter!!.getItem(i)!!.key.equals(sk.key)) {
                             Log.d("MainActivity","Found item: ${sk.key.toString()}" )
                             isFound = true;
                             continue
@@ -910,11 +924,12 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 spinnerAdapter!!.sort { a1, a2 -> a1.toString().compareTo(a2.toString(), true) }
-                if (spinnerAdapter!!.getItem(0)?.key.toString() != "select site") {
-                    spinnerAdapter!!.insert(SiteKey("select site"), 0)
-                }
+                Log.d("MainActivity", "getItem(0) -> ${spinnerAdapter!!.getItem(0)?.toString()}")
+                spinnerAdapter!!.insert(SiteKey("select site"), 0)
 
                 spinnerAdapter!!.notifyDataSetChanged()
+                MainActivity.clearAllUserPrefs()
+                SaveValuesToPrefs(allSiteKeys);
             } catch (x: Exception) {
                 Log.d("MainActivity", x.message)
                 val allSites = sites!!.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
@@ -927,6 +942,17 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+
+        fun SaveValuesToPrefs(allSiteKeys : MutableList<SiteKey>?){
+            val sites = MainActivity.appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
+
+            Log.d("MainActivity", sites.getString("sites", ""))
+            val edit = sites.edit()
+            val gson = GsonBuilder().disableHtmlEscaping().create()
+            val outValues = gson.toJson(allSiteKeys, allSiteKeys!!.javaClass)
+            edit.putString("sites", outValues)
+            edit.commit()
         }
 
         fun InitializeDeviceSpinner(btDeviceSpinner: Spinner) {
@@ -1000,7 +1026,9 @@ class MainActivity : AppCompatActivity() {
                         spinnerAdapter!!.add(sk)
                     }
                     spinnerAdapter!!.sort { a1, a2 -> a1.toString().compareTo(a2.toString(), true) }
-                    spinnerAdapter!!.insert(SiteKey("select site"), 0)
+                    if (!spinnerAdapter!!.getItem(0)?.toString().equals("select site")) {
+                        spinnerAdapter!!.insert(SiteKey("select site"), 0)
+                    }
 
                     spinnerAdapter!!.notifyDataSetChanged()
                 } catch (x: Exception) {
@@ -1092,8 +1120,9 @@ class MainActivity : AppCompatActivity() {
         fun clearAllUserPrefs() {
             val sites = appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
             val edit = sites.edit()
-            edit.clear()
+            edit.clear().apply()
             edit.commit()
+
             //PlaceholderFragment.loadSitesFromPrefs(v);
         }
 
