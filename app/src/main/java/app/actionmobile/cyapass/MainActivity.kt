@@ -734,24 +734,11 @@ class MainActivity : AppCompatActivity() {
 
                     importSiteKeysButton!!.setOnClickListener {
                         Log.d("MainActivity", "import button clicked!")
-                        val queue = Volley.newRequestQueue(it.context)
                         //val url = "http://raddev.us/allsitekeys.json"
                         //val url = "https://newlibre.com/allsitekeys.json"
-                        val url = "https://newlibre.com/oneSiteKey.json"
-// Request a string response from the provided URL.
-                        val stringRequest = StringRequest(
-                            Request.Method.GET, url,
-                            Response.Listener<String> { response ->
-                                // Display the first 500 characters of the response string.
-                                Log.d("MainActivity", "URL returned...")
-                                //Log.d("MainActivity","Response is: ${response.substring(0, 500)}")
-                                Log.d("MainActivity","Response is: ${response}")
-                                deserializeSiteKeys(response)
-                            },
-                            Response.ErrorListener { Log.d("MainActivity", "That didn't work!")})
+                        //val url = "https://newlibre.com/oneSiteKey.json"
+                        displayImportDialog()
 
-// Add the request to the RequestQueue.
-                        queue.add(stringRequest)
 
                     }
 
@@ -879,6 +866,41 @@ class MainActivity : AppCompatActivity() {
             }
 
             return rootView
+        }
+
+        fun displayImportDialog(){
+            val li = LayoutInflater.from(context)
+            val v = li.inflate(R.layout.import_dialog_main, null)
+
+            val builder = AlertDialog.Builder(v.getContext())
+            val queue = Volley.newRequestQueue(context)
+            var currentValue : String = ""
+
+            builder.setMessage("Import SiteKeys").setCancelable(false)
+                .setPositiveButton("OK") { dialog, id ->
+
+                    var url = v.findViewById(R.id.siteKeyListUrl) as EditText
+
+// Request a string response from the provided URL.
+                    val stringRequest = StringRequest(
+                        Request.Method.GET, url.text?.toString(),
+                        Response.Listener<String> { response ->
+                            // Display the first 500 characters of the response string.
+                            Log.d("MainActivity", "URL returned...")
+                            //Log.d("MainActivity","Response is: ${response.substring(0, 500)}")
+                            Log.d("MainActivity","Response is: ${response}")
+                            deserializeSiteKeys(response)
+                        },
+                        Response.ErrorListener { Log.d("MainActivity", "That didn't work!")})
+
+// Add the request to the RequestQueue.
+                    queue.add(stringRequest)
+
+                }
+                .setNegativeButton("CANCEL") { dialog, id -> }
+            val alert = builder.create()
+            alert.setView(v)
+            alert.show()
         }
 
         fun deserializeSiteKeys(sites: String){
