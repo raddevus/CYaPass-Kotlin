@@ -33,7 +33,6 @@ class SiteKey {
         key: String,
         hasSpecialChars: Boolean,
         hasUpperCase: Boolean,
-        hasMaxLength: Boolean,
         maxLength: Int
     ) {
         this.key = encodeToString(key.toByteArray(), Base64.NO_WRAP)

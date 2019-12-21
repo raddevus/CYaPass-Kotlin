@@ -336,7 +336,6 @@ class MainActivity : AppCompatActivity() {
                         currentValue,
                         specCharsCheckBox.isChecked,
                         ucCheckBox.isChecked,
-                        maxLengthCheckBox.isChecked,
                         if (maxLengthCheckBox.isChecked) Integer.parseInt(maxLengthEditText.text.toString()) else 0
                     )
 
@@ -405,7 +404,6 @@ class MainActivity : AppCompatActivity() {
                         currentValue,
                         specCharsCheckBox.isChecked,
                         ucCheckBox.isChecked,
-                        maxLengthCheckBox.isChecked,
                         if (maxLengthCheckBox.isChecked) Integer.parseInt(maxLengthEditText.text.toString()) else 0
                     )
 
