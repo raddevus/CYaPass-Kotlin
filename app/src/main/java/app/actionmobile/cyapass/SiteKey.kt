@@ -43,7 +43,7 @@ class SiteKey {
 
     override fun toString(): String {
         var decodedBytes : ByteArray  = decode(this.key,Base64.NO_WRAP)
-       return decodedBytes.toString(Charsets.ISO_8859_1)
+       return decodedBytes.toString(Charsets.UTF_8)
     }
 
     companion object {

@@ -27,17 +27,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.*
 
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.CompoundButton
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.ListView
-import android.widget.Spinner
-import android.widget.TextView
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
@@ -732,12 +723,7 @@ class MainActivity : AppCompatActivity() {
 
                     importSiteKeysButton!!.setOnClickListener {
                         Log.d("MainActivity", "import button clicked!")
-                        //val url = "http://raddev.us/allsitekeys.json"
-                        //val url = "https://newlibre.com/allsitekeys.json"
-                        //val url = "https://newlibre.com/oneSiteKey.json"
                         displayImportDialog()
-
-
                     }
 
                     sendEnterCheckbox.setOnClickListener {
@@ -883,13 +869,21 @@ class MainActivity : AppCompatActivity() {
                     val stringRequest = StringRequest(
                         Request.Method.GET, url.text?.toString(),
                         Response.Listener<String> { response ->
-                            // Display the first 500 characters of the response string.
                             Log.d("MainActivity", "URL returned...")
-                            //Log.d("MainActivity","Response is: ${response.substring(0, 500)}")
                             Log.d("MainActivity","Response is: ${response}")
-                            deserializeSiteKeys(response)
+                            val keysAddedCount = deserializeSiteKeys(response)
+                            val text = "Success! Imported ${keysAddedCount} new keys."
+                            val duration = Toast.LENGTH_LONG
+                            Toast.makeText(context, text, duration)
+                                .show()
                         },
-                        Response.ErrorListener { Log.d("MainActivity", "That didn't work!")})
+                        Response.ErrorListener {
+                            Log.d("MainActivity", "That didn't work!")
+                            val text = "Failed to import keys! Error: ${it.message}"
+                            val duration = Toast.LENGTH_LONG
+                            Toast.makeText(context, text, duration)
+                                .show()
+                        })
 
 // Add the request to the RequestQueue.
                     queue.add(stringRequest)
@@ -901,7 +895,7 @@ class MainActivity : AppCompatActivity() {
             alert.show()
         }
 
-        fun deserializeSiteKeys(sites: String){
+        fun deserializeSiteKeys(sites: String): Int{
             //remove the "select site" item every time -- it's added back later
             if (spinnerAdapter!!.count > 0) {
                 spinnerAdapter!!.remove(spinnerAdapter!!.getItem(0))
@@ -936,7 +930,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 var isFound : Boolean = false
-
+                var keysAddedCount = 0;
                 for (sk in allSiteKeys!!) {
                     isFound = false
                     Log.d("MainActivity","spinnerAdapter!!.count : ${spinnerAdapter!!.count}")
@@ -950,6 +944,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     if (!isFound) {
                         spinnerAdapter!!.add(sk)
+                        keysAddedCount++
                     }
                 }
                 spinnerAdapter!!.sort { a1, a2 -> a1.toString().compareTo(a2.toString(), true) }
@@ -959,18 +954,11 @@ class MainActivity : AppCompatActivity() {
                 spinnerAdapter!!.notifyDataSetChanged()
                 MainActivity.clearAllUserPrefs()
                 SaveValuesToPrefs();
+                return keysAddedCount
             } catch (x: Exception) {
                 Log.d("MainActivity", x.message)
-                val allSites = sites!!.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                Log.d("MainActivity", "sites : $sites")
-                Log.d("MainActivity", "Reading items from prefs")
-                for (s in allSites) {
-                    Log.d("MainActivity", "s : $s")
-                    if (s !== "") {
-                        spinnerAdapter!!.add(SiteKey(s))
-                    }
-                }
             }
+            return 0;
         }
 
         fun SaveValuesToPrefs(){
@@ -1041,7 +1029,7 @@ class MainActivity : AppCompatActivity() {
                 initializeSpinnerAdapter(vx)
                 val sites = sitePrefs.getString("sites", "")
                 Log.d("MainActivity", "sites : ${sites}")
-//                #### following two lines
+//                #### following two lines allow me to delete all sitekeys
 //                sitePrefs.edit().clear().apply()
 //                sitePrefs.edit().commit()
                 val gson = Gson()
