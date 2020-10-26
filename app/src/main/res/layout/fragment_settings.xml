@@ -78,20 +78,22 @@ android:orientation="vertical">
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
+
     <CheckBox
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight=".5"
-        android:text="Send Ctrl-Alt-Del"
-        android:id="@+id/sendCtrlAltDel"
-        android:textSize="8pt"/>
+            android:id="@+id/sendCtrlAltDel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".5"
+            android:text="Send Ctrl-Alt-Del"
+            android:textSize="18sp" />
+
     <CheckBox
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight=".5"
-        android:text="Send &lt;ENTER&gt;"
-        android:id="@+id/sendEnter"
-        android:textSize="8pt"/>
+            android:id="@+id/sendEnter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".5"
+            android:text="Send &lt;ENTER&gt;"
+            android:textSize="18sp" />
 </LinearLayout>
 
 <ListView
