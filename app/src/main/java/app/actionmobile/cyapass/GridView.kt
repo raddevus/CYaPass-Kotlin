@@ -221,7 +221,7 @@ class GridView(private val _context: Context) : View(_context) {
 
             val clipboard = _context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
             val clip = android.content.ClipData.newPlainText("Copied Text", sb.toString())
-            clipboard.primaryClip = clip
+            clipboard.setPrimaryClip(clip)
 
         } catch (nsa: NoSuchAlgorithmException) {
 

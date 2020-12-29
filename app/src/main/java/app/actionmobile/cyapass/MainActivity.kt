@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
         val clipboard = appContext!!.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
         //android.content.ClipData clip = android.content.ClipData.newPlainText("", "");
         val clip = android.content.ClipData.newPlainText(null, null)
-        clipboard.primaryClip = clip
+        clipboard.setPrimaryClip(clip)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -253,7 +253,7 @@ class MainActivity : AppCompatActivity() {
             val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
             //android.content.ClipData clip = android.content.ClipData.newPlainText("", "");
             val clip = android.content.ClipData.newPlainText(null, null)
-            clipboard.primaryClip = clip
+            clipboard.setPrimaryClip(clip)
         }
 
         private fun readClipboard(): String {
@@ -918,7 +918,7 @@ class MainActivity : AppCompatActivity() {
                         it.toString().equals(spinnerAdapter!!.getItem(itemCounter).toString())
                     }
                     if (x == null) {
-                        allSiteKeys!!.add(spinnerAdapter!!.getItem(itemCounter));
+                        spinnerAdapter!!.getItem(itemCounter)?.let { allSiteKeys!!.add(it) };
                         Log.d("MainActivity", "Items in spinner -->  ${spinnerAdapter!!.getItem(itemCounter).toString()}")
                     }
                 }
