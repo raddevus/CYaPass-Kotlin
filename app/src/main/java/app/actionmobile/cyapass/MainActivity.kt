@@ -600,10 +600,10 @@ class MainActivity : AppCompatActivity() {
 
                     }
 
-                    showPwdCheckBox!!.setOnClickListener {
-                        if (showPwdCheckBox!!.isChecked) {
-                            passwordText!!.visibility = View.VISIBLE
-                            passwordText!!.text = password
+                    showPwdCheckBox?.setOnClickListener {
+                        if (showPwdCheckBox?.isChecked!!) {
+                            passwordText?.visibility = View.VISIBLE
+                            passwordText?.text = password
                             Log.d("MainActivity", "password : " + password!!)
                             isPwdVisible = true
                         } else {
