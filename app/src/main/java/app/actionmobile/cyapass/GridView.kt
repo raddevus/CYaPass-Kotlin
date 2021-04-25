@@ -175,7 +175,7 @@ class GridView(private val _context: Context) : View(_context) {
     //@TargetApi(19)
     private fun CreateHash() {
         //String site = MainActivity.siteKey.getText().toString();  //"amazon";
-        if (MainActivity.currentSiteKey == null) {
+        if (MainActivity.currentSiteKey.key == "") {
             MainActivity.SetPassword("")
             return
         }

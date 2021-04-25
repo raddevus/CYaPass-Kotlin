@@ -287,14 +287,18 @@ class MainActivity : AppCompatActivity() {
             maxLengthTabCheckBox = rootView!!.findViewById(R.id.maxLengthTabCheckBox) as CheckBox
             maxLengthTabEditText = rootView!!.findViewById(R.id.maxLengthTabEditText) as EditText
 
-            addCharsTabCheckBox!!.isChecked = currentSiteKey!!.isHasSpecialChars
-            addUpperCaseTabCheckBox!!.isChecked = currentSiteKey!!.isHasUpperCase
-            maxLengthTabCheckBox!!.isChecked = currentSiteKey!!.maxLength > 0
+             currentSiteKey.isHasSpecialChars.let{
+                 addCharsTabCheckBox!!.isChecked =currentSiteKey.isHasSpecialChars;
+            }
+             currentSiteKey.isHasUpperCase.let{
+                 addUpperCaseTabCheckBox!!.isChecked =currentSiteKey.isHasUpperCase;
+            }
+            maxLengthTabCheckBox!!.isChecked = currentSiteKey.maxLength > 0
             addCharsTabCheckBox!!.jumpDrawablesToCurrentState()
             addUpperCaseTabCheckBox!!.jumpDrawablesToCurrentState()
             maxLengthTabCheckBox!!.jumpDrawablesToCurrentState()
-            if (currentSiteKey!!.maxLength > 0) {
-                maxLengthTabEditText!!.setText("${currentSiteKey!!.maxLength}")
+            if (currentSiteKey.maxLength > 0) {
+                maxLengthTabEditText!!.setText("${currentSiteKey.maxLength}")
             }
         }
 
@@ -317,6 +321,8 @@ class MainActivity : AppCompatActivity() {
                     val maxLengthEditText = v.findViewById(R.id.maxLengthEditText) as EditText
 
                     val originalLocation = allSiteKeys!!.indexOf(currentSiteKey)
+                    val localSiteKey = allSiteKeys!!.get(originalLocation);
+
                     Log.d("MainActivity", "originalLocation : $originalLocation")
                     allSiteKeys!!.removeAt(originalLocation)
 
@@ -325,9 +331,10 @@ class MainActivity : AppCompatActivity() {
 
                     currentSiteKey = SiteKey(
                         currentValue,
-                        specCharsCheckBox.isChecked,
-                        ucCheckBox.isChecked,
-                        if (maxLengthCheckBox.isChecked) Integer.parseInt(maxLengthEditText.text.toString()) else 0
+                        localSiteKey.isHasSpecialChars,
+                        localSiteKey.isHasUpperCase,
+                        localSiteKey.maxLength
+                        //if (maxLengthCheckBox.isChecked) Integer.parseInt(maxLengthEditText.text.toString()) else 0
                     )
 
                     allSiteKeys!!.add(originalLocation, currentSiteKey!!)
@@ -567,7 +574,7 @@ class MainActivity : AppCompatActivity() {
                                     view: View?, position: Int, id: Long
                         ) {
                             if (siteSpinner!!.selectedItemPosition <= 0) {
-                                currentSiteKey = null
+                                currentSiteKey = SiteKey("")
                                 gv!!.ClearGrid()
                                 gv!!.invalidate()
 
@@ -743,6 +750,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     addUpperCaseTabCheckBox!!.setOnCheckedChangeListener { buttonView, isChecked ->
+
                         if (isChecked) {
                             currentSiteKey!!.isHasUpperCase =true
                         } else {
@@ -1122,7 +1130,7 @@ class MainActivity : AppCompatActivity() {
         internal var maxLength = 32
 
         private var allSiteKeys: MutableList<SiteKey>? = mutableListOf<SiteKey>()
-        var currentSiteKey: SiteKey? = null
+        var currentSiteKey: SiteKey = SiteKey("")
 
         fun saveUserPrefValues() {
             val sites = MainActivity.appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
