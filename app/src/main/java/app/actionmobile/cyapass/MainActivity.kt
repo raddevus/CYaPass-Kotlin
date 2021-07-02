@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
                 try {
                     Thread.sleep(200)
                 } catch (e: InterruptedException) {
-                    Log.d("MainActivity", e.message)
+                    e.message?.let { it1 -> Log.d("MainActivity", it1) }
                 }
 
             }
@@ -180,7 +180,7 @@ class MainActivity : AppCompatActivity() {
                     val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
                     // Add the name and address to an array adapter to show in a ListView
                     //btDevice = device;
-                    adapter.add(device.name)// + "\n" + device.getAddress());
+                    adapter.add(device?.name)// + "\n" + device.getAddress());
                     otherDevices.add(device)
                     adapter.notifyDataSetChanged()
                 }
@@ -304,7 +304,7 @@ class MainActivity : AppCompatActivity() {
                 .setPositiveButton("OK") { dialog, id ->
                     val sites = MainActivity.appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
                     var outValues = sites.getString("sites", "")
-                    Log.d("MainActivity", sites.getString("sites", ""))
+                    sites.getString("sites", "")?.let { Log.d("MainActivity", it) }
                     val edit = sites.edit()
 
                     val ucCheckBox = v.findViewById(R.id.addUppercaseCheckBox) as CheckBox
@@ -377,7 +377,7 @@ class MainActivity : AppCompatActivity() {
                 .setPositiveButton("OK") { dialog, id ->
                     val sites = MainActivity.appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
                     var outValues = sites.getString("sites", "")
-                    Log.d("MainActivity", sites.getString("sites", ""))
+                    sites.getString("sites", "")?.let { Log.d("MainActivity", it) }
                     val edit = sites.edit()
 
                     val ucCheckBox = v.findViewById(R.id.addUppercaseCheckBox) as CheckBox
@@ -956,7 +956,7 @@ class MainActivity : AppCompatActivity() {
                 SaveValuesToPrefs();
                 return keysAddedCount
             } catch (x: Exception) {
-                Log.d("MainActivity", x.message)
+                x.message?.let { Log.d("MainActivity", it) }
             }
             return 0;
         }
@@ -1053,7 +1053,7 @@ class MainActivity : AppCompatActivity() {
 
                     spinnerAdapter!!.notifyDataSetChanged()
                 } catch (x: Exception) {
-                    Log.d("MainActivity", x.message)
+                    x.message?.let { Log.d("MainActivity", it) }
                     val allSites = sites!!.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                     Log.d("MainActivity", "sites : $sites")
                     Log.d("MainActivity", "Reading items from prefs")
@@ -1127,7 +1127,7 @@ class MainActivity : AppCompatActivity() {
         fun saveUserPrefValues() {
             val sites = MainActivity.appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
             var outValues = sites.getString("sites", "")
-            Log.d("MainActivity", sites.getString("sites", ""))
+            sites.getString("sites", "")?.let { Log.d("MainActivity", it) }
             val edit = sites.edit()
 
             val gson = Gson()
