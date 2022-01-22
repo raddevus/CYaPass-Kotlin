@@ -30,7 +30,7 @@ class GridView(private val _context: Context) : View(_context) {
     var viewHeight: Int = 0
     private var currentPoint: Point? = null
     internal var hitTestIdx: Int = 0
-
+    var density : Float;
     internal var numOfCells = 5
     var cellSize: Int = 0 //125
     var vx: View
@@ -51,7 +51,7 @@ class GridView(private val _context: Context) : View(_context) {
         /*        if (Build.VERSION.SDK_INT >= 11) {
             setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         } */
-        val density = resources.displayMetrics.density
+        density = resources.displayMetrics.density
         Log.d("MainActivity", "density : $density")
         val densityDPI = resources.displayMetrics.densityDpi
         Log.d("MainActivity", "densityDPI : $densityDPI")
@@ -244,7 +244,9 @@ class GridView(private val _context: Context) : View(_context) {
 
     private fun DrawGridLines() {
         val paint = Paint()
-
+        paint.strokeWidth = 1.2f * density;
+        paint.color = Color.LTGRAY;
+        Log.d("MainActivity", "paint.strokeWidth : " + paint.strokeWidth.toString());
         for (y in 0..numOfCells) {
             xCanvas!!.drawLine(
                 (0 + leftOffset).toFloat(), (y * cellSize + topOffset).toFloat(),
@@ -278,8 +280,9 @@ class GridView(private val _context: Context) : View(_context) {
         this.xCanvas = canvas
         super.onDraw(canvas)
 
-        DrawPosts()
         DrawGridLines()
+        DrawPosts()
+
         if (!isPatternHidden) {
             DrawUserShape(canvas)
             if (userPath.allPoints.size > 0) {
@@ -292,8 +295,8 @@ class GridView(private val _context: Context) : View(_context) {
         this.xCanvas = canvas
         super.dispatchDraw(canvas)
 
-        DrawPosts()
         DrawGridLines()
+        DrawPosts()
         if (!isPatternHidden) {
             DrawUserShape(canvas)
             if (userPath.allPoints.size > 0) {
