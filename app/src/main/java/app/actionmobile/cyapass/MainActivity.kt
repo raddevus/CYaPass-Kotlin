@@ -864,13 +864,22 @@ class MainActivity : AppCompatActivity() {
                 .setPositiveButton("OK") { dialog, id ->
 
                     var url = v.findViewById(R.id.siteKeyListUrl) as EditText
-
+                    var secretId = v.findViewById(R.id.cyaSecretId) as EditText
+                    var targetUrl : String = url.text.toString();
+                    targetUrl += "Cya/GetData?key=" + secretId.text;
+                    Log.d("MainActivity", targetUrl);
 // Request a string response from the provided URL.
                     val stringRequest = StringRequest(
-                        Request.Method.GET, url.text?.toString(),
+                        Request.Method.GET, targetUrl,
                         Response.Listener<String> { response ->
                             Log.d("MainActivity", "URL returned...")
                             Log.d("MainActivity","Response is: ${response}")
+                            val gson = Gson()
+                            try {
+                                Log.d("MainActivity", "Deserialize LibreStore JSON.")
+
+                                var testThing = gson.fromJson<Any>(response,)//, object : TypeToken<List<SiteK
+                            }
                             val keysAddedCount = deserializeSiteKeys(response)
                             val text = "Success! Imported ${keysAddedCount} new keys."
                             val duration = Toast.LENGTH_LONG

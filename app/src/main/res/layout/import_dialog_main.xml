@@ -7,11 +7,17 @@
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
         <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="SiteKey list URL"
-                android:id="@+id/siteKeyListUrl"/>
+                android:id="@+id/siteKeyListUrl"
+                android:text="https://NewLibre.com/LibreStore/"/>
+        <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="CYa Secret ID"
+                android:id="@+id/cyaSecretId"/>
     </LinearLayout>
 </LinearLayout>

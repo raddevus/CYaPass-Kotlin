@@ -10,6 +10,7 @@
       <map>
         <entry key="app/src/main/res/layout/fragment_main.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_settings.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/import_dialog_main.xml" value="0.121875" />
       </map>
     </option>
   </component>
