@@ -878,13 +878,21 @@ class MainActivity : AppCompatActivity() {
                             try {
                                 Log.d("MainActivity", "Deserialize LibreStore JSON.")
 
-                                var testThing = gson.fromJson<Any>(response,)//, object : TypeToken<List<SiteK
+                                var testThing = gson.fromJson<Any>(response, object : TypeToken<LibreStoreJson>(){
+
+                                }.type) as LibreStoreJson;
+                                //var bucket = gson.fromJson<Any>(testThing.)
+                                Log.d("MainActivity", testThing.success.toString())
+                                Log.d("MainActivity", testThing.cyabucket.data);
+                                val keysAddedCount = deserializeSiteKeys(testThing.cyabucket.data)
+                                val text = "Success! Imported ${keysAddedCount} new keys."
+                                val duration = Toast.LENGTH_LONG
+                                Toast.makeText(context, text, duration)
+                                    .show()
                             }
-                            val keysAddedCount = deserializeSiteKeys(response)
-                            val text = "Success! Imported ${keysAddedCount} new keys."
-                            val duration = Toast.LENGTH_LONG
-                            Toast.makeText(context, text, duration)
-                                .show()
+                            catch (x: Exception) {
+                                x.message?.let { Log.d("MainActivity", it) }
+                            }
                         },
                         Response.ErrorListener {
                             Log.d("MainActivity", "That didn't work!")
