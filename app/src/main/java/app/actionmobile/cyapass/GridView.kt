@@ -26,6 +26,7 @@ class GridView(private val _context: Context) : View(_context) {
     private val highlightOffset: Int
     private val topOffset = 20
     private var xCanvas: Canvas? = null
+    private var clearTextPwd : String = ""
     var viewWidth: Int = 0
     var viewHeight: Int = 0
     private var currentPoint: Point? = null
@@ -34,6 +35,9 @@ class GridView(private val _context: Context) : View(_context) {
     internal var numOfCells = 5
     var cellSize: Int = 0 //125
     var vx: View
+
+    var ClearTextPwd : String = ""
+        get() = this.clearTextPwd
 
     public var userPath = UserPath
 
@@ -186,6 +190,9 @@ class GridView(private val _context: Context) : View(_context) {
         val currentSiteKey = MainActivity.currentSiteKey
         Log.d("MainActivity", "site: " + currentSiteKey.toString())
         val text = "${userPath.PointValue}${currentSiteKey}"
+        Log.d("MainActivity", "text:   $text")
+        this.clearTextPwd = text;
+        Log.d("MainActivity", "clearTextPwd: ${this.clearTextPwd}")
         try {
             val digest = MessageDigest.getInstance("SHA-256")
             val hash = digest.digest(text.toByteArray(Charset.forName("UTF-8")))

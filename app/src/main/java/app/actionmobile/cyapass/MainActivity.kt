@@ -2,44 +2,29 @@ package app.actionmobile.cyapass
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
-import android.content.ClipData
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.SharedPreferences
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.tabs.TabLayout
+import android.content.*
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Base64
+import android.util.Log
+import android.view.*
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
-import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import android.widget.*
-
 import com.android.volley.Request
-import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-
-import java.util.ArrayList
-import java.util.Comparator
-import java.util.UUID
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.tabs.TabLayout
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.newlibre.aescrypt.Crypton
 
 class MainActivity : AppCompatActivity() {
 
@@ -859,6 +844,10 @@ class MainActivity : AppCompatActivity() {
             val builder = AlertDialog.Builder(v.getContext())
             val queue = Volley.newRequestQueue(context)
             var currentValue : String = ""
+            var secretId = v.findViewById(R.id.cyaSecretId) as EditText
+
+            // Force regeneration of password to insure all changes user has made are applied.
+            gv!!.GeneratePassword()
 
             builder.setMessage("Import SiteKeys").setCancelable(false)
                 .setPositiveButton("OK") { dialog, id ->
@@ -868,23 +857,60 @@ class MainActivity : AppCompatActivity() {
                     var targetUrl : String = url.text.toString();
                     targetUrl += "Cya/GetData?key=" + secretId.text;
                     Log.d("MainActivity", targetUrl);
+
 // Request a string response from the provided URL.
                     val stringRequest = StringRequest(
                         Request.Method.GET, targetUrl,
-                        Response.Listener<String> { response ->
+                        { response ->
                             Log.d("MainActivity", "URL returned...")
                             Log.d("MainActivity","Response is: ${response}")
                             val gson = Gson()
                             try {
                                 Log.d("MainActivity", "Deserialize LibreStore JSON.")
 
-                                var testThing = gson.fromJson<Any>(response, object : TypeToken<LibreStoreJson>(){
+                                var libreStore = gson.fromJson<Any>(response, object : TypeToken<LibreStoreJson>(){
 
                                 }.type) as LibreStoreJson;
                                 //var bucket = gson.fromJson<Any>(testThing.)
-                                Log.d("MainActivity", testThing.success.toString())
-                                Log.d("MainActivity", testThing.cyabucket.data);
-                                val keysAddedCount = deserializeSiteKeys(testThing.cyabucket.data)
+                                if (libreStore.success == false){
+                                    Log.d("MainActivity","message: ${libreStore.message}")
+                                    val alertDialog =
+                                        context?.let {
+                                            AlertDialog.Builder(it).create()
+                                        }
+                                    alertDialog?.setTitle("Import Failed")
+                                    alertDialog?.setMessage("${libreStore.message}\nPlease set a valid CYa Secret Id & try again.")
+                                    alertDialog?.setButton(
+                                        AlertDialog.BUTTON_NEUTRAL, "OK"
+                                    ) { dialog, which -> dialog.dismiss() }
+                                    alertDialog?.show()
+
+                                    throw Exception("failed")
+                                }
+                                Log.d("MainActivity", libreStore.success.toString())
+                                Log.d("MainActivity", libreStore.cyabucket.data)
+                                Log.d("MainActivity", "ClearTextPwd: ${gv!!.ClearTextPwd}")
+
+                                var c = Crypton("${gv!!.ClearTextPwd}",
+                                    Base64.decode(libreStore.cyabucket.data,Base64.DEFAULT))
+                                var decryptedData = c.processData(false)
+                                //processData on error - returns a string which includes "Decryption failed"
+                                Log.d("MainActivity",decryptedData.substring(0..16))
+
+                                if (decryptedData.substring(0..16) == "Decryption failed"){
+                                    val alertDialog =
+                                        context?.let {
+                                            AlertDialog.Builder(it).create()
+                                        }
+                                    alertDialog?.setTitle("Decryption Failed")
+                                    alertDialog?.setMessage("Could not decrypt data.\nPlease set a valid Password (pattern & sitekey) & try again.")
+                                    alertDialog?.setButton(
+                                        AlertDialog.BUTTON_NEUTRAL, "OK"
+                                    ) { dialog, which -> dialog.dismiss() }
+                                    alertDialog?.show()
+                                    throw Exception("Decryption failure: incorrect password!")
+                                }
+                                val keysAddedCount = deserializeSiteKeys(decryptedData)
                                 val text = "Success! Imported ${keysAddedCount} new keys."
                                 val duration = Toast.LENGTH_LONG
                                 Toast.makeText(context, text, duration)
@@ -894,7 +920,7 @@ class MainActivity : AppCompatActivity() {
                                 x.message?.let { Log.d("MainActivity", it) }
                             }
                         },
-                        Response.ErrorListener {
+                        {
                             Log.d("MainActivity", "That didn't work!")
                             val text = "Failed to import keys! Error: ${it.message}"
                             val duration = Toast.LENGTH_LONG
@@ -1168,6 +1194,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun SetPassword(pwd: String) {
+            Log.d("MainActivity", "pwd: $pwd")
             PlaceholderFragment.password = pwd
             if (isPwdVisible) {
                 passwordText!!.text = pwd
