@@ -12,6 +12,7 @@ import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -25,6 +26,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.newlibre.aescrypt.Crypton
+import java.nio.charset.Charset
 
 class MainActivity : AppCompatActivity() {
 
@@ -468,6 +470,7 @@ class MainActivity : AppCompatActivity() {
                     maxLengthTabCheckBox = settingsView!!.findViewById(R.id.maxLengthTabCheckBox) as CheckBox
                     maxLengthTabEditText = settingsView!!.findViewById(R.id.maxLengthTabEditText) as EditText
                     importSiteKeysButton = settingsView!!.findViewById(R.id.importSiteKeysButton) as Button
+                    exportSiteKeysButton = settingsView!!.findViewById(R.id.exportSiteKeysButton) as Button
                 }
                 2 -> {
                     addUpperCaseTabCheckBox = rootView!!.findViewById(R.id.addUCaseTabCheckBox) as CheckBox
@@ -475,6 +478,7 @@ class MainActivity : AppCompatActivity() {
                     maxLengthTabCheckBox = rootView!!.findViewById(R.id.maxLengthTabCheckBox) as CheckBox
                     maxLengthTabEditText = rootView!!.findViewById(R.id.maxLengthTabEditText) as EditText
                     importSiteKeysButton = rootView!!.findViewById(R.id.importSiteKeysButton) as Button
+                    exportSiteKeysButton = rootView!!.findViewById(R.id.exportSiteKeysButton) as Button
                 }
             }
             if (currentSiteKey != null) {
@@ -684,7 +688,7 @@ class MainActivity : AppCompatActivity() {
                     sendCtrlAltDelCheckbox = rootView!!.findViewById(R.id.sendCtrlAltDel) as CheckBox
                     sendEnterCheckbox = rootView!!.findViewById(R.id.sendEnter) as CheckBox
                     importSiteKeysButton = rootView!!.findViewById(R.id.importSiteKeysButton) as Button
-
+                    exportSiteKeysButton = rootView!!.findViewById(R.id.exportSiteKeysButton) as Button
                     sendEnterCheckbox.isChecked = true
                     maxLengthTabEditText!!.setText("32")
                     addUpperCaseTabCheckBox!!.requestFocus()
@@ -708,6 +712,11 @@ class MainActivity : AppCompatActivity() {
                     importSiteKeysButton!!.setOnClickListener {
                         Log.d("MainActivity", "import button clicked!")
                         displayImportDialog()
+                    }
+
+                    exportSiteKeysButton!!.setOnClickListener {
+                        Log.d("MainActivity", "export button clicked!")
+                        displayExportDialog()
                     }
 
                     sendEnterCheckbox.setOnClickListener {
@@ -837,6 +846,80 @@ class MainActivity : AppCompatActivity() {
             return rootView
         }
 
+        fun displayExportDialog() {
+            val li = LayoutInflater.from(context)
+            val v = li.inflate(R.layout.import_dialog_main, null)
+
+            val builder = AlertDialog.Builder(v.getContext())
+            val queue = Volley.newRequestQueue(context)
+
+            var secretId = v.findViewById(R.id.cyaSecretId) as EditText
+
+            // Force regeneration of password to insure all changes user has made are applied.
+            gv!!.GeneratePassword()
+            var currentPwd : String = gv!!.ClearTextPwd
+            if (currentPwd == ""){
+                Toast.makeText(context,"Please set a valid Password (pattern & sitekey), used to encrypt your data, & try again.",Toast.LENGTH_LONG).show()
+                return;
+            }
+            val sites = MainActivity.appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
+            var clearTextSiteKeyJson : String = "${sites.getString("sites", "")}"
+            var c = Crypton(currentPwd,clearTextSiteKeyJson.toByteArray(Charsets.UTF_8))
+            var outData : String = c.processData()
+            Log.d("MainActivity", "${outData.length}");
+
+            builder.setMessage("Export SiteKeys").setCancelable(false)
+                .setPositiveButton("OK") { dialog, id ->
+                    try {
+                        var url = v.findViewById(R.id.siteKeyListUrl) as EditText
+                        var secretId = v.findViewById(R.id.cyaSecretId) as EditText
+                        var targetUrl: String = url.text.toString();
+                        targetUrl += "Cya/SaveData?key=" + secretId.text;
+
+                        Log.d("MainActivity", targetUrl);
+                        Log.d("MainActivity", "OK button")
+                        Log.d("MainActivity", secretId.text.toString())
+                        if (secretId.text.toString() == "") {
+
+                            throw Exception("Please set secretId");
+                        }
+
+                        val stringRequest = object : StringRequest(
+                            Request.Method.POST, targetUrl,
+                            { response ->
+                                Log.d("MainActivity", "URL returned...")
+                                Log.d("MainActivity", "Response is: ${response}")
+                            },
+                            {
+                                Log.d("MainActivity", "That didn't work!")
+                                val text = "Failed to import keys! Error: ${it.message}"
+                                val duration = Toast.LENGTH_LONG
+                                Toast.makeText(context, text, duration)
+                                    .show()
+                            }) {
+                            //Press Ctr + O to find getParams
+                            override fun getParams(): MutableMap<String, String> {
+                                val hashMap = HashMap<String, String>()
+                                hashMap.put("key", secretId.text.toString())
+                                hashMap.put("data", outData)
+                                return hashMap
+                            }
+                        }
+                        // Add the request to the RequestQueue.
+                        queue.add(stringRequest)
+                    }
+                    catch (ex : Exception){
+                        Log.d("MainActivity", ex.message.toString());
+                    }
+                }
+                .setNegativeButton("CANCEL") { dialog, id ->
+                    Log.d("MainActivity", "Cancel button")
+                }
+            val alert = builder.create()
+            alert.setView(v)
+            alert.show()
+        }
+
         fun displayImportDialog(){
             val li = LayoutInflater.from(context)
             val v = li.inflate(R.layout.import_dialog_main, null)
@@ -844,7 +927,6 @@ class MainActivity : AppCompatActivity() {
             val builder = AlertDialog.Builder(v.getContext())
             val queue = Volley.newRequestQueue(context)
             var currentValue : String = ""
-            var secretId = v.findViewById(R.id.cyaSecretId) as EditText
 
             // Force regeneration of password to insure all changes user has made are applied.
             gv!!.GeneratePassword()
@@ -1050,6 +1132,7 @@ class MainActivity : AppCompatActivity() {
             private var maxLengthTabCheckBox: CheckBox? = null
             private var maxLengthTabEditText: EditText? = null
             private var importSiteKeysButton: Button? = null
+            private var exportSiteKeysButton: Button? = null
 
             internal var hidePatternCheckbox: CheckBox? = null
 
