@@ -10,8 +10,8 @@ android {
         applicationId "app.actionmobile.cyapass"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 4
-        versionName "2.21"
+        versionCode 5
+        versionName "2.50"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
