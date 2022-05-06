@@ -26,6 +26,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.newlibre.aescrypt.Crypton
+import org.json.JSONObject
 import java.nio.charset.Charset
 
 class MainActivity : AppCompatActivity() {
@@ -863,7 +864,12 @@ class MainActivity : AppCompatActivity() {
                 return;
             }
             val sites = MainActivity.appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)
+
             var clearTextSiteKeyJson : String = "${sites.getString("sites", "")}"
+            Log.d("MainActivity", clearTextSiteKeyJson);
+            val siteKeyCount = clearTextSiteKeyJson.split("Key").size -1
+            Log.d("MainActivity", "$siteKeyCount");
+
             var c = Crypton(currentPwd,clearTextSiteKeyJson.toByteArray(Charsets.UTF_8))
             var outData : String = c.processData()
             Log.d("MainActivity", "${outData.length}");
@@ -880,6 +886,16 @@ class MainActivity : AppCompatActivity() {
                         Log.d("MainActivity", "OK button")
                         Log.d("MainActivity", secretId.text.toString())
                         if (secretId.text.toString() == "") {
+                            val alertDialog =
+                                context?.let {
+                                    AlertDialog.Builder(it).create()
+                                }
+                            alertDialog?.setTitle("Cannot Export!")
+                            alertDialog?.setMessage("Please set a valid CYa Secret Id & try again.")
+                            alertDialog?.setButton(
+                                AlertDialog.BUTTON_NEUTRAL, "OK"
+                            ) { dialog, which -> dialog.dismiss() }
+                            alertDialog?.show()
 
                             throw Exception("Please set secretId");
                         }
@@ -889,13 +905,43 @@ class MainActivity : AppCompatActivity() {
                             { response ->
                                 Log.d("MainActivity", "URL returned...")
                                 Log.d("MainActivity", "Response is: ${response}")
+
+                                val jsonVal = JSONObject(response);
+                                val requestStatus = jsonVal.getBoolean("success");
+
+                                val text = "Success! $siteKeyCount key(s) exported."
+                                val alertDialog =
+                                    context?.let {
+                                        AlertDialog.Builder(it).create()
+                                    }
+                                alertDialog?.setTitle("Export Succeeded")
+                                alertDialog?.setMessage(text)
+                                alertDialog?.setButton(
+                                    AlertDialog.BUTTON_NEUTRAL, "OK"
+                                ) { dialog, which -> dialog.dismiss() }
+                                alertDialog?.show()
                             },
                             {
                                 Log.d("MainActivity", "That didn't work!")
-                                val text = "Failed to import keys! Error: ${it.message}"
-                                val duration = Toast.LENGTH_LONG
-                                Toast.makeText(context, text, duration)
-                                    .show()
+                                try {
+                                    val failMsg =
+                                        when (it.networkResponse.statusCode) {
+                                            in 300..399 -> "${it.networkResponse.statusCode}: Unknown Redirect Error. Check URL & try again."
+                                            in 400..499 -> "${it.networkResponse.statusCode}: May be incorrect URL! Check, try again."
+                                            in 500..599 -> "${it.networkResponse.statusCode}: Server side error.  Please try again."
+                                            else -> "Unknown communication failure. Please try again."
+                                        }
+                                    val text = "Failed to export keys! $failMsg"
+                                    val duration = Toast.LENGTH_LONG
+                                    Toast.makeText(context, text, duration)
+                                        .show()
+                                }
+                                catch (ex: Exception){
+                                    val duration = Toast.LENGTH_LONG
+                                    val failMsg = "${ex.message} : Export failed. Probably a bad URL. Please try again."
+                                    Toast.makeText(context, failMsg , duration)
+                                        .show()
+                                }
                             }) {
                             //Press Ctr + O to find getParams
                             override fun getParams(): MutableMap<String, String> {
@@ -926,93 +972,124 @@ class MainActivity : AppCompatActivity() {
 
             val builder = AlertDialog.Builder(v.getContext())
             val queue = Volley.newRequestQueue(context)
-            var currentValue : String = ""
 
             // Force regeneration of password to insure all changes user has made are applied.
             gv!!.GeneratePassword()
-
+            var currentPwd : String = gv!!.ClearTextPwd
+            if (currentPwd == ""){
+                Toast.makeText(context,"Please set a valid Password (pattern & sitekey), used to encrypt your data, & try again.",Toast.LENGTH_LONG).show()
+                return;
+            }
             builder.setMessage("Import SiteKeys").setCancelable(false)
                 .setPositiveButton("OK") { dialog, id ->
 
-                    var url = v.findViewById(R.id.siteKeyListUrl) as EditText
-                    var secretId = v.findViewById(R.id.cyaSecretId) as EditText
-                    var targetUrl : String = url.text.toString();
-                    targetUrl += "Cya/GetData?key=" + secretId.text;
-                    Log.d("MainActivity", targetUrl);
+                    try {
+                        var url = v.findViewById(R.id.siteKeyListUrl) as EditText
+                        var secretId = v.findViewById(R.id.cyaSecretId) as EditText
+                        var targetUrl: String = url.text.toString();
+                        targetUrl += "Cya/GetData?key=" + secretId.text;
+                        Log.d("MainActivity", targetUrl);
+
+                        if (secretId.text.toString() == "") {
+                            val alertDialog =
+                                context?.let {
+                                    AlertDialog.Builder(it).create()
+                                }
+                            alertDialog?.setTitle("Cannot Import!")
+                            alertDialog?.setMessage("Please set a valid CYa Secret Id & try again.")
+                            alertDialog?.setButton(
+                                AlertDialog.BUTTON_NEUTRAL, "OK"
+                            ) { dialog, which -> dialog.dismiss() }
+                            alertDialog?.show()
+                            throw Exception("Please set secretId");
+                        }
 
 // Request a string response from the provided URL.
-                    val stringRequest = StringRequest(
-                        Request.Method.GET, targetUrl,
-                        { response ->
-                            Log.d("MainActivity", "URL returned...")
-                            Log.d("MainActivity","Response is: ${response}")
-                            val gson = Gson()
-                            try {
-                                Log.d("MainActivity", "Deserialize LibreStore JSON.")
+                        val stringRequest = StringRequest(
+                            Request.Method.GET, targetUrl,
+                            { response ->
+                                Log.d("MainActivity", "URL returned...")
+                                Log.d("MainActivity", "Response is: ${response}")
+                                val gson = Gson()
+                                try {
+                                    Log.d("MainActivity", "Deserialize LibreStore JSON.")
 
-                                var libreStore = gson.fromJson<Any>(response, object : TypeToken<LibreStoreJson>(){
+                                    var libreStore = gson.fromJson<Any>(
+                                        response,
+                                        object : TypeToken<LibreStoreJson>() {
 
-                                }.type) as LibreStoreJson;
-                                //var bucket = gson.fromJson<Any>(testThing.)
-                                if (libreStore.success == false){
-                                    Log.d("MainActivity","message: ${libreStore.message}")
+                                        }.type
+                                    ) as LibreStoreJson;
+                                    //var bucket = gson.fromJson<Any>(testThing.)
+                                    if (libreStore.success == false) {
+                                        Log.d("MainActivity", "message: ${libreStore.message}")
+                                        val alertDialog =
+                                            context?.let {
+                                                AlertDialog.Builder(it).create()
+                                            }
+                                        alertDialog?.setTitle("Import Failed")
+                                        alertDialog?.setMessage("${libreStore.message}\nPlease set a valid CYa Secret Id & try again.")
+                                        alertDialog?.setButton(
+                                            AlertDialog.BUTTON_NEUTRAL, "OK"
+                                        ) { dialog, which -> dialog.dismiss() }
+                                        alertDialog?.show()
+
+                                        throw Exception("failed")
+                                    }
+                                    Log.d("MainActivity", libreStore.success.toString())
+                                    Log.d("MainActivity", libreStore.cyabucket.data)
+
+                                    var c = Crypton(
+                                        currentPwd,
+                                        Base64.decode(libreStore.cyabucket.data, Base64.DEFAULT)
+                                    )
+                                    var decryptedData = c.processData(false)
+                                    //processData on error - returns a string which includes "Decryption failed"
+                                    //Log.d("MainActivity", decryptedData.substring(0..16))
+
+                                    if (decryptedData.substring(0..16) == "Decryption failed") {
+                                        val alertDialog =
+                                            context?.let {
+                                                AlertDialog.Builder(it).create()
+                                            }
+                                        alertDialog?.setTitle("Decryption Failed")
+                                        alertDialog?.setMessage("Could not decrypt data.\nPlease set a valid Password (pattern & sitekey) & try again.")
+                                        alertDialog?.setButton(
+                                            AlertDialog.BUTTON_NEUTRAL, "OK"
+                                        ) { dialog, which -> dialog.dismiss() }
+                                        alertDialog?.show()
+                                        throw Exception("Decryption failure: incorrect password!")
+                                    }
+                                    val keysAddedCount = deserializeSiteKeys(decryptedData)
+                                    val text = "Success! Imported ${keysAddedCount} new key(s)."
                                     val alertDialog =
                                         context?.let {
                                             AlertDialog.Builder(it).create()
                                         }
-                                    alertDialog?.setTitle("Import Failed")
-                                    alertDialog?.setMessage("${libreStore.message}\nPlease set a valid CYa Secret Id & try again.")
+                                    alertDialog?.setTitle("Import Succeeded")
+                                    alertDialog?.setMessage(text)
                                     alertDialog?.setButton(
                                         AlertDialog.BUTTON_NEUTRAL, "OK"
                                     ) { dialog, which -> dialog.dismiss() }
                                     alertDialog?.show()
-
-                                    throw Exception("failed")
+                                } catch (x: Exception) {
+                                    x.message?.let { Log.d("MainActivity", it) }
                                 }
-                                Log.d("MainActivity", libreStore.success.toString())
-                                Log.d("MainActivity", libreStore.cyabucket.data)
-                                Log.d("MainActivity", "ClearTextPwd: ${gv!!.ClearTextPwd}")
-
-                                var c = Crypton("${gv!!.ClearTextPwd}",
-                                    Base64.decode(libreStore.cyabucket.data,Base64.DEFAULT))
-                                var decryptedData = c.processData(false)
-                                //processData on error - returns a string which includes "Decryption failed"
-                                Log.d("MainActivity",decryptedData.substring(0..16))
-
-                                if (decryptedData.substring(0..16) == "Decryption failed"){
-                                    val alertDialog =
-                                        context?.let {
-                                            AlertDialog.Builder(it).create()
-                                        }
-                                    alertDialog?.setTitle("Decryption Failed")
-                                    alertDialog?.setMessage("Could not decrypt data.\nPlease set a valid Password (pattern & sitekey) & try again.")
-                                    alertDialog?.setButton(
-                                        AlertDialog.BUTTON_NEUTRAL, "OK"
-                                    ) { dialog, which -> dialog.dismiss() }
-                                    alertDialog?.show()
-                                    throw Exception("Decryption failure: incorrect password!")
-                                }
-                                val keysAddedCount = deserializeSiteKeys(decryptedData)
-                                val text = "Success! Imported ${keysAddedCount} new keys."
+                            },
+                            {
+                                Log.d("MainActivity", "That didn't work!")
+                                val text = "Failed to import keys! Error: ${it.message}"
                                 val duration = Toast.LENGTH_LONG
                                 Toast.makeText(context, text, duration)
                                     .show()
-                            }
-                            catch (x: Exception) {
-                                x.message?.let { Log.d("MainActivity", it) }
-                            }
-                        },
-                        {
-                            Log.d("MainActivity", "That didn't work!")
-                            val text = "Failed to import keys! Error: ${it.message}"
-                            val duration = Toast.LENGTH_LONG
-                            Toast.makeText(context, text, duration)
-                                .show()
-                        })
+                            })
 
 // Add the request to the RequestQueue.
-                    queue.add(stringRequest)
+                        queue.add(stringRequest)
+                    }
+                    catch (ex: Exception){
 
+                    }
                 }
                 .setNegativeButton("CANCEL") { dialog, id -> }
             val alert = builder.create()
