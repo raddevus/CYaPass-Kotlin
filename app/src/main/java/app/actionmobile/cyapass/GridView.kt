@@ -218,7 +218,7 @@ class GridView(private val _context: Context) : View(_context) {
                     sb.setCharAt(firstLetterIndex, sb.toString().toUpperCase()[firstLetterIndex])
                 }
             }
-            if (currentSiteKey?.maxLength > 0) {
+            if (currentSiteKey!!.maxLength > 0) {
                 val temp = StringBuilder()
                 temp.insert(0, sb.substring(0, currentSiteKey!!.maxLength))
                 sb = temp
