@@ -12,7 +12,7 @@ import android.view.View
 import java.nio.charset.Charset
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import java.util.ArrayList
+import java.util.*
 
 /**
  * Created by roger.deutsch on 6/7/2016.
@@ -79,9 +79,9 @@ class GridView(private val _context: Context) : View(_context) {
 
         //leftOffset = (int)(viewWidth / .9) / 4;
         Log.d("MainActivity", "leftOffset : $leftOffset")
-        GenerateAllPosts()
+        generateAllPosts()
 
-        this.setOnTouchListener(OnTouchListener { v, event ->
+        setOnTouchListener(OnTouchListener { v, event ->
             if (isPatternHidden) {
                 return@OnTouchListener true
             }
@@ -92,17 +92,17 @@ class GridView(private val _context: Context) : View(_context) {
                         touchX.toString() + "x" + touchY.toString()
                 //Toast.makeText(v.getContext(), output, Toast.LENGTH_SHORT).show();
                 currentPoint = Point(touchX, touchY)
-                if (SelectNewPoint(currentPoint!!)) {
+                if (selectNewPoint(currentPoint!!)) {
                     v.invalidate()
                     userPath.CalculateGeometricValue()
-                    GeneratePassword()
+                    generatePassword()
                 }
             }
             true
         })
     }
 
-    fun ClearGrid() {
+    fun clearGrid() {
         if (!isPatternHidden) {
             userPath.init()
         }
@@ -110,7 +110,7 @@ class GridView(private val _context: Context) : View(_context) {
         vx.invalidate()
     }
 
-    private fun DrawUserShape(canvas: Canvas) {
+    private fun drawUserShape(canvas: Canvas) {
         val paint = Paint()
         paint.color = Color.BLUE
         paint.strokeWidth = 8f
@@ -132,7 +132,7 @@ class GridView(private val _context: Context) : View(_context) {
 
     }
 
-    private fun DrawHighlight(p: Point) {
+    private fun drawHighlight(p: Point) {
         Log.d("MainActivity", "DrawHighlight()...")
         Log.d("MainActivity", p.toString())
         val paint = Paint()
@@ -152,19 +152,19 @@ class GridView(private val _context: Context) : View(_context) {
 
     }
 
-    private fun SelectNewPoint(p: Point): Boolean {
-        val currentPoint = HitTest(Point(p.x, p.y)) ?: return false
+    private fun selectNewPoint(p: Point): Boolean {
+        val currentPoint = hitTest(Point(p.x, p.y)) ?: return false
         userPath.append(currentPoint, hitTestIdx + hitTestIdx * (hitTestIdx / 6) * 10)
         userPath.CalculateGeometricValue()
 
         return true
     }
 
-    fun GeneratePassword() {
-        CreateHash()
+    fun generatePassword() {
+        createHash()
     }
 
-    private fun GenerateAllPosts() {
+    private fun generateAllPosts() {
         _allPosts = ArrayList()
         // NOTE: removed the -(postWid/2) because drawLine works via centerpoint instead of offset like C#
         for (x in 0..5) {
@@ -177,7 +177,7 @@ class GridView(private val _context: Context) : View(_context) {
     }
 
     //@TargetApi(19)
-    private fun CreateHash() {
+    private fun createHash() {
         //String site = MainActivity.siteKey.getText().toString();  //"amazon";
         if (MainActivity.currentSiteKey.key == "") {
             MainActivity.SetPassword("")
@@ -191,7 +191,7 @@ class GridView(private val _context: Context) : View(_context) {
         Log.d("MainActivity", "site: " + currentSiteKey.toString())
         val text = "${userPath.PointValue}${currentSiteKey}"
         Log.d("MainActivity", "text:   $text")
-        this.clearTextPwd = text;
+        this.clearTextPwd = text
         Log.d("MainActivity", "clearTextPwd: ${this.clearTextPwd}")
         try {
             val digest = MessageDigest.getInstance("SHA-256")
@@ -200,27 +200,27 @@ class GridView(private val _context: Context) : View(_context) {
             for (b in hash) {
                 sb.append(String.format("%02x", b))
             }
-            if (currentSiteKey!!.isHasSpecialChars) {
+            if (currentSiteKey.isHasSpecialChars) {
                 // yes, I still get the special chars from what the user typed on the form
                 // because I don't store special chars in JSON as a protection
                 if (MainActivity.specialChars != null && MainActivity.specialChars !== "") {
                     sb.insert(2, MainActivity.specialChars)
                 }
             }
-            if (currentSiteKey!!.isHasUpperCase) {
+            if (currentSiteKey.isHasUpperCase) {
                 Log.d("MainActivity", "calling addUpperCase()")
                 val firstLetterIndex = addUpperCase(sb.toString())
                 Log.d("MainActivity", "firstLetterIndex : $firstLetterIndex")
                 if (firstLetterIndex >= 0) {
                     // get the string, uppercase it, get the uppercased char at location
                     Log.d("MainActivity", "calling sb.setCharAt()")
-                    Log.d("MainActivity", "value : " + sb.toString().toUpperCase()[firstLetterIndex].toString())
-                    sb.setCharAt(firstLetterIndex, sb.toString().toUpperCase()[firstLetterIndex])
+                    Log.d("MainActivity", "value : " + sb.toString().uppercase(Locale.getDefault())[firstLetterIndex].toString())
+                    sb.setCharAt(firstLetterIndex, sb.toString().uppercase(Locale.getDefault())[firstLetterIndex])
                 }
             }
-            if (currentSiteKey!!.maxLength > 0) {
+            if (currentSiteKey.maxLength > 0) {
                 val temp = StringBuilder()
-                temp.insert(0, sb.substring(0, currentSiteKey!!.maxLength))
+                temp.insert(0, sb.substring(0, currentSiteKey.maxLength))
                 sb = temp
             }
             Log.d("MainActivity", sb.toString())
@@ -249,11 +249,11 @@ class GridView(private val _context: Context) : View(_context) {
         return -1
     }
 
-    private fun DrawGridLines() {
+    private fun drawGridLines() {
         val paint = Paint()
         paint.strokeWidth = 1.2f * density;
         paint.color = Color.LTGRAY;
-        Log.d("MainActivity", "paint.strokeWidth : " + paint.strokeWidth.toString());
+        Log.d("MainActivity", "paint.strokeWidth : " + paint.strokeWidth.toString())
         for (y in 0..numOfCells) {
             xCanvas!!.drawLine(
                 (0 + leftOffset).toFloat(), (y * cellSize + topOffset).toFloat(),
@@ -272,7 +272,7 @@ class GridView(private val _context: Context) : View(_context) {
 
     }
 
-    private fun DrawPosts() {
+    private fun drawPosts() {
 
         val paint = Paint()
         // Use Color.parseColor to define HTML colors
@@ -287,13 +287,13 @@ class GridView(private val _context: Context) : View(_context) {
         this.xCanvas = canvas
         super.onDraw(canvas)
 
-        DrawGridLines()
-        DrawPosts()
+        drawGridLines()
+        drawPosts()
 
         if (!isPatternHidden) {
-            DrawUserShape(canvas)
+            drawUserShape(canvas)
             if (userPath.allPoints.size > 0) {
-                DrawHighlight(userPath.allPoints[0])
+                drawHighlight(userPath.allPoints[0])
             }
         }
     }
@@ -302,17 +302,17 @@ class GridView(private val _context: Context) : View(_context) {
         this.xCanvas = canvas
         super.dispatchDraw(canvas)
 
-        DrawGridLines()
-        DrawPosts()
+        drawGridLines()
+        drawPosts()
         if (!isPatternHidden) {
-            DrawUserShape(canvas)
+            drawUserShape(canvas)
             if (userPath.allPoints.size > 0) {
-                DrawHighlight(userPath.allPoints[0])
+                drawHighlight(userPath.allPoints[0])
             }
         }
     }
 
-    private fun HitTest(p: Point): Point? {
+    private fun hitTest(p: Point): Point? {
         var loopcount = 0
         hitTestIdx = 0
         for (Pt in _allPosts!!) {

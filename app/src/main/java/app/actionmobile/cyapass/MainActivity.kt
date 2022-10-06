@@ -12,7 +12,6 @@ import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -27,7 +26,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.newlibre.aescrypt.Crypton
 import org.json.JSONObject
-import java.nio.charset.Charset
 
 class MainActivity : AppCompatActivity() {
 
@@ -557,7 +555,7 @@ class MainActivity : AppCompatActivity() {
                         ) {
                             if (siteSpinner!!.selectedItemPosition <= 0) {
                                 currentSiteKey = SiteKey("")
-                                gv!!.ClearGrid()
+                                gv!!.clearGrid()
                                 gv!!.invalidate()
 
                                 passwordText!!.text = ""
@@ -579,7 +577,7 @@ class MainActivity : AppCompatActivity() {
                             }
                             maxLengthTabCheckBox!!.isChecked = currentSiteKey!!.maxLength > 0
                             if (gv!!.isLineSegmentComplete) {
-                                gv!!.GeneratePassword()
+                                gv!!.generatePassword()
                             }
                         }
 
@@ -608,7 +606,7 @@ class MainActivity : AppCompatActivity() {
                             hidePatternCheckbox!!.isChecked = false
                         }
 
-                        gv!!.ClearGrid()
+                        gv!!.clearGrid()
                         up = null
                         gv!!.invalidate()
                         password = ""
@@ -622,7 +620,7 @@ class MainActivity : AppCompatActivity() {
                         Log.d("MainActivity", "hidePatternCheckbox isChecked : $isChecked")
                         if (isChecked) {
                             gv!!.setPatternHidden(true)
-                            gv!!.ClearGrid()
+                            gv!!.clearGrid()
                             gv!!.invalidate()
                         } else {
                             gv!!.setPatternHidden(false)
@@ -745,7 +743,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         if (gv!!.isLineSegmentComplete) {
                             Log.d("MainActivity", "addChars -- Re-generating password...")
-                            gv!!.GeneratePassword()
+                            gv!!.generatePassword()
                         }
                     }
 
@@ -757,7 +755,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         if (gv!!.isLineSegmentComplete) {
                             Log.d("MainActivity", "addChars -- Re-generating password...")
-                            gv!!.GeneratePassword()
+                            gv!!.generatePassword()
                         }
                     }
 
@@ -772,7 +770,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         if (gv!!.isLineSegmentComplete) {
                             Log.d("MainActivity", "addChars -- Re-generating password...")
-                            gv!!.GeneratePassword()
+                            gv!!.generatePassword()
                         }
                     })
 
@@ -783,7 +781,7 @@ class MainActivity : AppCompatActivity() {
                             }
                             MainActivity.specialChars = s.toString()
                             if (currentSiteKey!!.isHasSpecialChars) {
-                                gv!!.GeneratePassword()
+                                gv!!.generatePassword()
                             }
                         }
 
@@ -803,7 +801,7 @@ class MainActivity : AppCompatActivity() {
                                 if (s.length > 0) {
                                     MainActivity.maxLength = Integer.parseInt(s.toString())
                                     if (isMaxLength) {
-                                        gv!!.GeneratePassword()
+                                        gv!!.generatePassword()
                                     }
                                 }
 
@@ -857,7 +855,7 @@ class MainActivity : AppCompatActivity() {
             var secretId = v.findViewById(R.id.cyaSecretId) as EditText
 
             // Force regeneration of password to insure all changes user has made are applied.
-            gv!!.GeneratePassword()
+            gv!!.generatePassword()
             var currentPwd : String = gv!!.ClearTextPwd
             if (currentPwd == ""){
                 Toast.makeText(context,"Please set a valid Password (pattern & sitekey), used to encrypt your data, & try again.",Toast.LENGTH_LONG).show()
@@ -974,7 +972,7 @@ class MainActivity : AppCompatActivity() {
             val queue = Volley.newRequestQueue(context)
 
             // Force regeneration of password to insure all changes user has made are applied.
-            gv!!.GeneratePassword()
+            gv!!.generatePassword()
             var currentPwd : String = gv!!.ClearTextPwd
             if (currentPwd == ""){
                 Toast.makeText(context,"Please set a valid Password (pattern & sitekey), used to encrypt your data, & try again.",Toast.LENGTH_LONG).show()
