@@ -1,6 +1,8 @@
 package com.newlibre.aescrypt
 
-import java.lang.Exception
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.*
@@ -9,6 +11,8 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
+import java.security.SecureRandom
+
 
 class Crypton(val password: String, val targetBytes: ByteArray) {
 
@@ -35,7 +39,7 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
     //    If your data is encoded then decode it properly first and only send the raw bytes
     //    into the DecryptData() function with the correct password & everything will work fine.
 
-    fun processData(isEncrypt: Boolean = true): String{
+    fun processData(ivIn: String = "", isEncrypt: Boolean = true): String{
 
         val keygen = KeyGenerator.getInstance("AES")
         keygen.init(256)
@@ -43,25 +47,33 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
 
         // when you convert any string to a Sha256 it will always be 32 bytes (256 bits)
         // which is exactly the size we need our AES key to be.
-        val rawSha256OfPassword = ConvertStringToSha256(password);
-
+        // In this case we pass the user's original cleartext password and convert it to a SHA256
+        val rawSha256OfPassword = ConvertStringToSha256(password)
+        Log.d("Crypton", rawSha256OfPassword.size.toString())
         val spec = SecretKeySpec(rawSha256OfPassword, "AES")
-        val iv : ByteArray = rawSha256OfPassword.slice(0..15).toByteArray()
-
+        // previously we used first 16 bytes of the rawSha256 Password to generate IV
+        // now we need to use a generated IV.
+        // val iv : ByteArray = rawSha256OfPassword.slice(0..15).toByteArray()
+        val iv : ByteArray  = if (isEncrypt){
+            generateRandomIv()
+        } else{
+            hexStringToByteArray(ivIn)
+        }
+        Log.d("Crypton", iv.size.toString())
         val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
 
         //Create IvParameterSpec
         val ivSpec = IvParameterSpec(iv)
 
         if (isEncrypt){
-             //Perform Encryption
+            //Perform Encryption
             //Initialize Cipher for ENCRYPT_MODE
             cipher.init(Cipher.ENCRYPT_MODE, spec, ivSpec)
             return cipher.doFinal(targetBytes).toBase64()
         }
         else {
             try {
-                  //Initialize Cipher for DECRYPT_MODE
+                //Initialize Cipher for DECRYPT_MODE
                 cipher.init(Cipher.DECRYPT_MODE, spec, ivSpec)
 
                 //Perform Decryption
@@ -75,6 +87,7 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
         return "fail"
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun ByteArray.toBase64(): String =
         String(Base64.getEncoder().encode(this))
 
@@ -82,5 +95,38 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
         val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
         val hash: ByteArray = digest.digest(plainText.toByteArray(StandardCharsets.UTF_8))
         return hash;
+    }
+    fun hexStringToByteArray(hexString: String): ByteArray {
+
+        val len: Int = hexString.length
+        val data = ByteArray(len / 2)
+
+        var i = 0
+        while (i < len) {
+            var stringByte : String = hexString[i].toString() + hexString[i+1].toString()
+            data[i / 2] = Integer.parseInt(stringByte,16).toByte()
+            i += 2
+        }
+
+        Log.d("Crypton", BytesToHex(data))
+        return data
+    }
+
+    fun BytesToHex(sha256HashKey : ByteArray) : String {
+        var hex: String = ""
+        for (i in sha256HashKey) {
+            // Note: The capital X in the format string causes
+            // the hex value to contain uppercase hex values (A-F)
+            hex += String.format("%02X", i)
+        }
+        return hex;
+    }
+
+    fun generateRandomIv() : ByteArray{
+        var sr = SecureRandom()
+        var iv = ByteArray(16)
+        sr.nextBytes(iv)
+        Log.d("Crypton", BytesToHex(iv))
+        return iv
     }
 }

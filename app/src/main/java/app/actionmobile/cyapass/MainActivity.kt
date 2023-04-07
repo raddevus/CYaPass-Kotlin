@@ -1041,7 +1041,7 @@ class MainActivity : AppCompatActivity() {
                                         currentPwd,
                                         Base64.decode(libreStore.cyabucket.data, Base64.DEFAULT)
                                     )
-                                    var decryptedData = c.processData(false)
+                                    var decryptedData = c.processData(libreStore.cyabucket.iv,false)
                                     //processData on error - returns a string which includes "Decryption failed"
                                     //Log.d("MainActivity", decryptedData.substring(0..16))
 
