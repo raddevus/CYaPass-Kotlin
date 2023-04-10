@@ -698,15 +698,15 @@ class MainActivity : AppCompatActivity() {
                     logViewAdapter = ArrayAdapter(rootView!!.context, android.R.layout.simple_list_item_1, logViewItems)
                     logView.adapter = logViewAdapter
 
-                    btAdapter = BluetoothAdapter.getDefaultAdapter()
-                    if (btAdapter != null) {
-                        if (!btAdapter.isEnabled) {
-                            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-                        }
-                        pairedDevices = GetPairedDevices(btAdapter)
-                        //DiscoverAvailableDevices();
-                    }
+//                    btAdapter = BluetoothAdapter.getDefaultAdapter()
+//                    if (btAdapter != null) {
+//                        if (!btAdapter.isEnabled) {
+//                            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+//                            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+//                        }
+//                        pairedDevices = GetPairedDevices(btAdapter)
+//                        //DiscoverAvailableDevices();
+//                    }
 
                     importSiteKeysButton!!.setOnClickListener {
                         Log.d("MainActivity", "import button clicked!")

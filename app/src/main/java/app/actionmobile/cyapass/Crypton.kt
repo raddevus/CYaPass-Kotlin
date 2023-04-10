@@ -12,6 +12,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import java.security.SecureRandom
+import javax.crypto.Mac
 
 
 class Crypton(val password: String, val targetBytes: ByteArray) {
@@ -129,4 +130,40 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
         Log.d("Crypton", BytesToHex(iv))
         return iv
     }
+
+    companion object{
+        fun generateHmac(secret: String, message: String) : String{
+
+            // Discovered that in my JavaScript code I used the SHA256 pwd hash
+            // directly as the 64 byte key for the Hmac secret.
+            // That's why here I'm converting the 64 byte SHA256 pwd directly to bytes,
+            // instead of converting each two chars in the hash to one byte.
+            var secretBytes = secret.toByteArray(Charsets.UTF_8);
+            Log.d("Crypton", "in generateHmac")
+            Log.d("Crypton", secretBytes.size.toString())
+
+            val keySpec = SecretKeySpec(
+                secretBytes,
+                "HmacSHA256"
+            )
+
+            val mac: Mac = Mac.getInstance("HmacSHA256")
+            mac.init(keySpec)
+            val rawHmac: ByteArray = mac.doFinal(message.toByteArray())
+            Log.d("Crypton", rawHmac.size.toString())
+
+            return BytesToHex(rawHmac)
+        }
+
+        fun BytesToHex(sha256HashKey : ByteArray) : String {
+            var hex: String = ""
+            for (i in sha256HashKey) {
+                // Note: The capital X in the format string causes
+                // the hex value to contain uppercase hex values (A-F)
+                hex += String.format("%02x", i)
+            }
+            return hex;
+        }
+    }
+
 }
