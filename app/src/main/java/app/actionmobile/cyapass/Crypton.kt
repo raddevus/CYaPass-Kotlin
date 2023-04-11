@@ -40,6 +40,8 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
     //    If your data is encoded then decode it properly first and only send the raw bytes
     //    into the DecryptData() function with the correct password & everything will work fine.
 
+    private lateinit var iv : ByteArray
+
     fun processData(ivIn: String = "", isEncrypt: Boolean = true): String{
 
         val keygen = KeyGenerator.getInstance("AES")
@@ -55,7 +57,7 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
         // previously we used first 16 bytes of the rawSha256 Password to generate IV
         // now we need to use a generated IV.
         // val iv : ByteArray = rawSha256OfPassword.slice(0..15).toByteArray()
-        val iv : ByteArray  = if (isEncrypt){
+        iv = if (isEncrypt){
             generateRandomIv()
         } else{
             hexStringToByteArray(ivIn)
@@ -95,7 +97,12 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
     private fun ConvertStringToSha256(plainText : String) : ByteArray{
         val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
         val hash: ByteArray = digest.digest(plainText.toByteArray(StandardCharsets.UTF_8))
-        return hash;
+        return hash
+    }
+
+    fun getIvAsHexString() : String{
+        Log.d("Crypton", "getIvAsHexString() -> ${BytesToHex(iv)}")
+        return BytesToHex(iv)
     }
     fun hexStringToByteArray(hexString: String): ByteArray {
 
@@ -118,16 +125,16 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
         for (i in sha256HashKey) {
             // Note: The capital X in the format string causes
             // the hex value to contain uppercase hex values (A-F)
-            hex += String.format("%02X", i)
+            hex += String.format("%02x", i)
         }
-        return hex;
+        return hex
     }
 
     fun generateRandomIv() : ByteArray{
         var sr = SecureRandom()
         var iv = ByteArray(16)
         sr.nextBytes(iv)
-        Log.d("Crypton", BytesToHex(iv))
+        Log.d("Crypton", "BytesToHex(iv) : ${BytesToHex(iv)}")
         return iv
     }
 
@@ -138,7 +145,7 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
             // directly as the 64 byte key for the Hmac secret.
             // That's why here I'm converting the 64 byte SHA256 pwd directly to bytes,
             // instead of converting each two chars in the hash to one byte.
-            var secretBytes = secret.toByteArray(Charsets.UTF_8);
+            var secretBytes = secret.toByteArray(Charsets.UTF_8)
             Log.d("Crypton", "in generateHmac")
             Log.d("Crypton", secretBytes.size.toString())
 
@@ -162,7 +169,7 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
                 // the hex value to contain uppercase hex values (A-F)
                 hex += String.format("%02x", i)
             }
-            return hex;
+            return hex
         }
     }
 

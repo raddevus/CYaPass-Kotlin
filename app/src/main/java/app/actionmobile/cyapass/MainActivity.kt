@@ -870,7 +870,13 @@ class MainActivity : AppCompatActivity() {
 
             var c = Crypton(currentPwd,clearTextSiteKeyJson.toByteArray(Charsets.UTF_8))
             var outData : String = c.processData()
-            Log.d("MainActivity", "${outData.length}");
+            Log.d("MainActivity", "outData.length ${outData.length}");
+            val iv = c.getIvAsHexString()
+            Log.d("MainActivity", "mainactivity -> iv: $iv")
+            Log.d("MainActivity", "outData: ${outData}")
+            Log.d("MainActivity", "iv:outdata = ${iv}:${outData}")
+            val hmac = Crypton.generateHmac(currentPwd,"${iv}:${outData}")
+            Log.d("MainActivity", "hmac: ${hmac}")
 
             builder.setMessage("Export SiteKeys").setCancelable(false)
                 .setPositiveButton("OK") { dialog, id ->
@@ -946,6 +952,8 @@ class MainActivity : AppCompatActivity() {
                                 val hashMap = HashMap<String, String>()
                                 hashMap.put("key", secretId.text.toString())
                                 hashMap.put("data", outData)
+                                hashMap.put("hmac", hmac)
+                                hashMap.put("iv", iv)
                                 return hashMap
                             }
                         }
