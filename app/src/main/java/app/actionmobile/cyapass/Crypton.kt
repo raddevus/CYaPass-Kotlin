@@ -43,17 +43,19 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
     private lateinit var iv : ByteArray
     private lateinit var rawSha256OfPassword : ByteArray
 
-    fun processData(ivIn: String = "", isEncrypt: Boolean = true): String{
-
-        val keygen = KeyGenerator.getInstance("AES")
-        keygen.init(256)
-        val key : SecretKey = keygen.generateKey()
-
+    init {
         // when you convert any string to a Sha256 it will always be 32 bytes (256 bits)
         // which is exactly the size we need our AES key to be.
         // In this case we pass the user's original cleartext password and convert it to a SHA256
         rawSha256OfPassword = ConvertStringToSha256(password)
         Log.d("Crypton", rawSha256OfPassword.size.toString())
+    }
+
+    fun processData(ivIn: String = "", isEncrypt: Boolean = true): String{
+
+        val keygen = KeyGenerator.getInstance("AES")
+        keygen.init(256)
+
         val spec = SecretKeySpec(rawSha256OfPassword, "AES")
         // previously we used first 16 bytes of the rawSha256 Password to generate IV
         // now we need to use a generated IV.
@@ -63,7 +65,7 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
         } else{
             hexStringToByteArray(ivIn)
         }
-        Log.d("Crypton", iv.size.toString())
+        Log.d("Crypton", "iv.size: ${iv.size.toString()}")
         val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
 
         //Create IvParameterSpec

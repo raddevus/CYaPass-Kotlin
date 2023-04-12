@@ -1049,6 +1049,25 @@ class MainActivity : AppCompatActivity() {
                                         currentPwd,
                                         Base64.decode(libreStore.cyabucket.data, Base64.DEFAULT)
                                     )
+                                    // Check the HMAC to insure that no one has altered the iv or encrypted data
+                                    val localHmac = Crypton.generateHmac(c.getSha256PwdString(),
+                                                        "${libreStore.cyabucket.iv}:${libreStore.cyabucket.data}")
+                                    Log.d("MainActivity", "localHmac: $localHmac")
+                                    if (localHmac != libreStore.cyabucket.hmac){
+                                        val alertDialog =
+                                            context?.let {
+                                                AlertDialog.Builder(it).create()
+                                            }
+                                        alertDialog?.setTitle("Import Failed")
+                                        alertDialog?.setMessage("Hmac (hashed message authentication code) has been altered!\nData is corrupted or altered.")
+                                        alertDialog?.setButton(
+                                            AlertDialog.BUTTON_NEUTRAL, "OK"
+                                        ) { dialog, which -> dialog.dismiss() }
+                                        alertDialog?.show()
+
+                                        throw Exception("failed")
+                                    }
+
                                     var decryptedData = c.processData(libreStore.cyabucket.iv,false)
                                     //processData on error - returns a string which includes "Decryption failed"
                                     //Log.d("MainActivity", decryptedData.substring(0..16))
