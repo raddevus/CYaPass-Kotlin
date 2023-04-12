@@ -875,7 +875,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("MainActivity", "mainactivity -> iv: $iv")
             Log.d("MainActivity", "outData: ${outData}")
             Log.d("MainActivity", "iv:outdata = ${iv}:${outData}")
-            val hmac = Crypton.generateHmac(currentPwd,"${iv}:${outData}")
+            val hmac = Crypton.generateHmac(c.getSha256PwdString(),"${iv}:${outData}")
             Log.d("MainActivity", "hmac: ${hmac}")
 
             builder.setMessage("Export SiteKeys").setCancelable(false)

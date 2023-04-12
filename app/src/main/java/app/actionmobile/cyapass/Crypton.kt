@@ -41,6 +41,7 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
     //    into the DecryptData() function with the correct password & everything will work fine.
 
     private lateinit var iv : ByteArray
+    private lateinit var rawSha256OfPassword : ByteArray
 
     fun processData(ivIn: String = "", isEncrypt: Boolean = true): String{
 
@@ -51,7 +52,7 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
         // when you convert any string to a Sha256 it will always be 32 bytes (256 bits)
         // which is exactly the size we need our AES key to be.
         // In this case we pass the user's original cleartext password and convert it to a SHA256
-        val rawSha256OfPassword = ConvertStringToSha256(password)
+        rawSha256OfPassword = ConvertStringToSha256(password)
         Log.d("Crypton", rawSha256OfPassword.size.toString())
         val spec = SecretKeySpec(rawSha256OfPassword, "AES")
         // previously we used first 16 bytes of the rawSha256 Password to generate IV
@@ -104,6 +105,10 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
         Log.d("Crypton", "getIvAsHexString() -> ${BytesToHex(iv)}")
         return BytesToHex(iv)
     }
+
+    fun getSha256PwdString() : String{
+        return BytesToHex(rawSha256OfPassword)
+    }
     fun hexStringToByteArray(hexString: String): ByteArray {
 
         val len: Int = hexString.length
@@ -138,16 +143,17 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
         return iv
     }
 
-    companion object{
-        fun generateHmac(secret: String, message: String) : String{
+    companion object {
+        fun generateHmac(secret: String, message: String): String {
 
             // Discovered that in my JavaScript code I used the SHA256 pwd hash
             // directly as the 64 byte key for the Hmac secret.
             // That's why here I'm converting the 64 byte SHA256 pwd directly to bytes,
             // instead of converting each two chars in the hash to one byte.
-            var secretBytes = secret.toByteArray(Charsets.UTF_8)
+            var secretBytes = secret.toByteArray(Charsets.UTF_8);
             Log.d("Crypton", "in generateHmac")
-            Log.d("Crypton", secretBytes.size.toString())
+            Log.d("Crypton", "secretBytes size - ${secretBytes.size.toString()}")
+            Log.d("Crypton", "secret: $secret")
 
             val keySpec = SecretKeySpec(
                 secretBytes,
@@ -162,14 +168,14 @@ class Crypton(val password: String, val targetBytes: ByteArray) {
             return BytesToHex(rawHmac)
         }
 
-        fun BytesToHex(sha256HashKey : ByteArray) : String {
+        fun BytesToHex(sha256HashKey: ByteArray): String {
             var hex: String = ""
             for (i in sha256HashKey) {
                 // Note: The capital X in the format string causes
                 // the hex value to contain uppercase hex values (A-F)
                 hex += String.format("%02x", i)
             }
-            return hex
+            return hex;
         }
     }
 
