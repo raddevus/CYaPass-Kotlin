@@ -1059,7 +1059,7 @@ class MainActivity : AppCompatActivity() {
                                                 AlertDialog.Builder(it).create()
                                             }
                                         alertDialog?.setTitle("Import Failed")
-                                        alertDialog?.setMessage("Hmac (hashed message authentication code) has been altered!\nData is corrupted or altered.")
+                                        alertDialog?.setMessage("Hmac (hashed message authentication code) does not match expected value!\nData is corrupted or altered.\nNo data has been imported.")
                                         alertDialog?.setButton(
                                             AlertDialog.BUTTON_NEUTRAL, "OK"
                                         ) { dialog, which -> dialog.dismiss() }
