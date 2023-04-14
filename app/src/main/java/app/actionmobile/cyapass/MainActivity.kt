@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     private var mViewPager: ViewPager? = null
     internal var pairedDevices: Set<BluetoothDevice>? = null
     private var btAdapter: BluetoothAdapter? = null
-    internal var ct: ConnectThread? = null
+
     private var tabLayout: TabLayout? = null
 
     private val layout1: LinearLayout? = null
@@ -64,86 +64,12 @@ class MainActivity : AppCompatActivity() {
         tabLayout = findViewById(R.id.tabs) as TabLayout
         tabLayout?.setupWithViewPager(mViewPager)
 
-        val sendFab = findViewById<FloatingActionButton>(R.id.sendFab)
-        sendFab.setOnClickListener(View.OnClickListener {
-            if (MainActivity.btCurrentDeviceName === "") {
-                return@OnClickListener
-            }
-            sendPasswordViaBT()
-            if (isSendCtrlAltDel) {
-                ct!!.writeCtrlAltDel()
-                try {
-                    Thread.sleep(200)
-                } catch (e: InterruptedException) {
-                    e.message?.let { it1 -> Log.d("MainActivity", it1) }
-                }
-
-            }
-            writeData()
-        })
     }
 
     /** Called before the activity is destroyed  */
     public override fun onDestroy() {
 
         super.onDestroy()
-    }
-
-    private fun sendPasswordViaBT() {
-
-        if (btAdapter == null) {
-            btAdapter = BluetoothAdapter.getDefaultAdapter()
-        }
-        if (btAdapter != null) {
-            if (!btAdapter!!.isEnabled) {
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-            }
-        } else {
-            Log.d("MainActivity", "no bt adapter available")
-            return  // cannot get btadapter
-        }
-
-        if (pairedDevices == null) {
-            pairedDevices = btAdapter!!.bondedDevices
-        }
-        if (pairedDevices!!.size > 0) {
-
-            for (btItem in pairedDevices!!) {
-                if (btItem != null) {
-                    val name = btItem.name
-                    if (name == MainActivity.btCurrentDeviceName) {
-                        val uuid = btItem.uuids[0].uuid
-                        Log.d("MainActivity", uuid.toString())
-                        if (ct == null) {
-                            ct = ConnectThread(btItem, uuid, null)
-                        }
-                        ct!!.run(btAdapter!!)
-
-                        return
-                    }
-                }
-            }
-        }
-    }
-
-    private fun writeData() {
-        var clipText = readClipboard()
-        if (isSendEnter) {
-            clipText += "\n"
-        }
-        Log.d("MainActivity", "on clipboard : $clipText")
-        if (clipText != "") {
-            ct!!.writeMessage(clipText)
-            try {
-                Thread.sleep(200)
-                ct!!.cancel()
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            } finally {
-                ct = null
-            }
-        }
     }
 
     private fun readClipboard(): String {
@@ -155,28 +81,6 @@ class MainActivity : AppCompatActivity() {
         }
         return ""
     }
-
-    fun DiscoverAvailableDevices(adapter: ArrayAdapter<String>, otherDevices: ArrayAdapter<BluetoothDevice>) {
-        val mReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val action = intent.action
-                // When discovery finds a device
-                if (BluetoothDevice.ACTION_FOUND == action) {
-                    // Get the BluetoothDevice object from the Intent
-                    val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
-                    // Add the name and address to an array adapter to show in a ListView
-                    //btDevice = device;
-                    adapter.add(device?.name)// + "\n" + device.getAddress());
-                    otherDevices.add(device)
-                    adapter.notifyDataSetChanged()
-                }
-            }
-        }
-        // Register the BroadcastReceiver
-        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-        registerReceiver(mReceiver, filter) // Don't forget to unregister during onDestroy
-    }
-
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -202,30 +106,11 @@ class MainActivity : AppCompatActivity() {
      * A placeholder fragment containing a simple view.
      */
     class PlaceholderFragment : Fragment() {
-        private val otherDevices = ArrayList<BluetoothDevice>()
-        private val ct: ConnectThread? = null
-        private var pairedDevices: Set<BluetoothDevice>? = null
         private var showPwdCheckBox: CheckBox? = null
         private var siteSpinner: Spinner? = null
         // clearbutton seems to always work when the gv is NOT static.
         private var gv: GridView? = null
         private var up: UserPath? = null
-
-
-        private fun GetPairedDevices(btAdapter: BluetoothAdapter): Set<BluetoothDevice> {
-
-            val pairedDevices = btAdapter.bondedDevices
-            // If there are paired devices
-            if (pairedDevices.size > 0) {
-                // Loop through paired devices
-                for (device in pairedDevices) {
-                    // Add the name and address to an array adapter to show in a ListView
-                    adapter!!.add(device.name)// + "\n" + device.getAddress());
-                }
-                adapter!!.notifyDataSetChanged()
-            }
-            return pairedDevices
-        }
 
         private fun clearClipboard() {
             val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
