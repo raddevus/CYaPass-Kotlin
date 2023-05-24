@@ -205,6 +205,8 @@ class GridView(private val _context: Context) : View(_context) {
                 // because I don't store special chars in JSON as a protection
                 if (MainActivity.specialChars != null && MainActivity.specialChars !== "") {
                     sb.insert(2, MainActivity.specialChars)
+                    Log.d("MainActivity", " ${MainActivity.specialChars.toString().length}")
+                    sb = StringBuilder(sb.substring(0, sb.length - MainActivity.specialChars.toString().length -1))
                 }
             }
             if (currentSiteKey.isHasUpperCase) {
