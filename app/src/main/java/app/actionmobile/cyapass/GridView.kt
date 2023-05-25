@@ -206,7 +206,7 @@ class GridView(private val _context: Context) : View(_context) {
                 if (MainActivity.specialChars != null && MainActivity.specialChars !== "") {
                     sb.insert(2, MainActivity.specialChars)
                     Log.d("MainActivity", " ${MainActivity.specialChars.toString().length}")
-                    sb = StringBuilder(sb.substring(0, sb.length - MainActivity.specialChars.toString().length -1))
+                    sb = StringBuilder(sb.substring(0, sb.length - MainActivity.specialChars.toString().length))
                 }
             }
             if (currentSiteKey.isHasUpperCase) {
