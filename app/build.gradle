@@ -8,9 +8,9 @@ android {
     defaultConfig {
         applicationId "app.actionmobile.cyapass"
         minSdkVersion 26
-        targetSdkVersion 31
-        versionCode 262
-        versionName "2.62"
+        targetSdkVersion 33
+        versionCode 263
+        versionName "2.63"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
