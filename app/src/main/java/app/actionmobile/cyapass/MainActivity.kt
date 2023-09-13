@@ -134,15 +134,6 @@ class MainActivity : AppCompatActivity() {
             MainActivity.btCurrentDeviceName = devicePrefs.getString("deviceName", "")
 
         }
-
-        fun saveDeviceNamePref() {
-            val devicePrefs = appContext!!.getSharedPreferences("deviceName", Context.MODE_PRIVATE)
-            val edit = devicePrefs.edit()
-            edit.putString("deviceName", MainActivity.btCurrentDeviceName)
-            edit.commit()
-            //PlaceholderFragment.loadSitesFromPrefs(v);
-        }
-
         private fun setSettingsValues() {
 
             addUpperCaseTabCheckBox = rootView!!.findViewById(R.id.addUCaseTabCheckBox) as CheckBox
@@ -385,7 +376,6 @@ class MainActivity : AppCompatActivity() {
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
         ): View? {
-            loadCurrentDeviceName()
 
             //final GridView gv = new us.raddev.com.cyapass.cyapass.GridView(rootView.getContext());
             gv = app.actionmobile.cyapass.GridView(appContext!!)
@@ -447,8 +437,6 @@ class MainActivity : AppCompatActivity() {
                                 password = ""
 
                                 clearClipboard()
-
-
                                 return
                             }
 
@@ -561,7 +549,6 @@ class MainActivity : AppCompatActivity() {
                     val outText: EditText
                     val specialCharsText: EditText
 
-                    btDeviceSpinner = rootView!!.findViewById(R.id.btDevice) as Spinner
                     logView = rootView!!.findViewById(R.id.logView) as ListView
 
                     addUpperCaseTabCheckBox = rootView!!.findViewById(R.id.addUCaseTabCheckBox) as CheckBox
@@ -576,22 +563,6 @@ class MainActivity : AppCompatActivity() {
                     sendEnterCheckbox.isChecked = true
                     maxLengthTabEditText!!.setText("32")
                     addUpperCaseTabCheckBox!!.requestFocus()
-
-                    adapter = ArrayAdapter(rootView!!.context, android.R.layout.simple_list_item_1, listViewItems)
-                    btDeviceSpinner.adapter = adapter
-
-                    logViewAdapter = ArrayAdapter(rootView!!.context, android.R.layout.simple_list_item_1, logViewItems)
-                    logView.adapter = logViewAdapter
-
-//                    btAdapter = BluetoothAdapter.getDefaultAdapter()
-//                    if (btAdapter != null) {
-//                        if (!btAdapter.isEnabled) {
-//                            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-//                            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-//                        }
-//                        pairedDevices = GetPairedDevices(btAdapter)
-//                        //DiscoverAvailableDevices();
-//                    }
 
                     importSiteKeysButton!!.setOnClickListener {
                         Log.d("MainActivity", "import button clicked!")
@@ -703,27 +674,6 @@ class MainActivity : AppCompatActivity() {
                         }
 
                     })
-
-                    btDeviceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                        override fun onItemSelected(
-                            parentView: AdapterView<*>,
-                            selectedItemView: View,
-                            position: Int,
-                            id: Long
-                        ) {
-                            btCurrentDeviceName = btDeviceSpinner.selectedItem.toString()
-                            saveDeviceNamePref()
-                            Log.d("MainActivity", "DeviceInfo : " + btCurrentDeviceName!!)
-                            logViewAdapter.add("DeviceInfo : " + btCurrentDeviceName!!)
-                            logViewAdapter.notifyDataSetChanged()
-                        }
-
-                        override fun onNothingSelected(parentView: AdapterView<*>) {
-                            // your code here
-                        }
-                    }
-
-                    InitializeDeviceSpinner(btDeviceSpinner)
                 }
             }
 
@@ -1086,27 +1036,12 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        fun InitializeDeviceSpinner(btDeviceSpinner: Spinner) {
-            if (btCurrentDeviceName != null && btCurrentDeviceName !== "") {
-                var counter = 0
-                while (counter < adapter!!.count) {
-                    Log.d("MainActivity", "adapter.getItem : " + adapter!!.getItem(counter)!!.toString())
-                    if (adapter!!.getItem(counter).toString() == btCurrentDeviceName) {
-                        break
-                    }
-                    counter++
-                }
-                btDeviceSpinner.setSelection(counter)
-            }
-        }
-
         companion object {
             /**
              * The fragment argument representing the section number for this
              * fragment.
              */
             private val ARG_SECTION_NUMBER = "section_number"
-            internal val REQUEST_ENABLE_BT = 1
             private var adapter: ArrayAdapter<String>? = null
             public var password: String? = null
             private val spinnerItems = ArrayList<SiteKey>()
@@ -1206,7 +1141,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun getCount(): Int {
-            // Show 3 total pages.
+            // Show 2 total pages (tabs).
             return 2
         }
 

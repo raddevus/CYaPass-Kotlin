@@ -193,13 +193,14 @@ class GridView(private val _context: Context) : View(_context) {
         Log.d("MainActivity", "text:   $text")
         this.clearTextPwd = text
         Log.d("MainActivity", "clearTextPwd: ${this.clearTextPwd}")
-        try {
-            val digest = MessageDigest.getInstance("SHA-256")
-            val hash = digest.digest(text.toByteArray(Charset.forName("UTF-8")))
-            var sb = StringBuilder()
-            for (b in hash) {
-                sb.append(String.format("%02x", b))
-            }
+        var sb = GenHashFromString(text)
+        var count = 1;
+        Log.d("MainActivity", "sb 1 => ${sb.toString()}")
+        while (count < 501){
+            sb = GenHashFromString("${userPath.PointValue}" + sb.toString())
+            Log.d("MainActivity", "sb 2 => ${sb.toString()}")
+            count++;
+        }
             if (currentSiteKey.isHasSpecialChars) {
                 // yes, I still get the special chars from what the user typed on the form
                 // because I don't store special chars in JSON as a protection
@@ -232,10 +233,19 @@ class GridView(private val _context: Context) : View(_context) {
             val clip = android.content.ClipData.newPlainText("Copied Text", sb.toString())
             clipboard.setPrimaryClip(clip)
 
-        } catch (nsa: NoSuchAlgorithmException) {
 
-        }
 
+    }
+    private fun GenHashFromString(text: String) : StringBuilder{
+        var sb = StringBuilder()
+        try {
+            val digest = MessageDigest.getInstance("SHA-256")
+            val hash = digest.digest(text.toByteArray(Charset.forName("UTF-8")))
+            for (b in hash) {
+                sb.append(String.format("%02x", b))
+            }
+        } catch (nsa: NoSuchAlgorithmException) {}
+        return sb;
     }
 
     private fun addUpperCase(sb: String): Int {
