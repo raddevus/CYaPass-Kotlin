@@ -140,20 +140,18 @@ class MainActivity : AppCompatActivity() {
             addUpperCaseTabCheckBox = rootView!!.findViewById(R.id.addUCaseTabCheckBox) as CheckBox
             addCharsTabCheckBox = rootView!!.findViewById(R.id.addCharsTabCheckBox) as CheckBox
             maxLengthTabCheckBox = rootView!!.findViewById(R.id.maxLengthTabCheckBox) as CheckBox
-            multiHashCheckBox = rootView!!.findViewById(R.id.multiHashCheckBox) as CheckBox
-            maxLengthTabEditText = rootView!!.findViewById(R.id.maxLengthTabEditText) as EditText
-
-             currentSiteKey.isHasSpecialChars.let{
+            currentSiteKey.isHasSpecialChars.let{
                  addCharsTabCheckBox!!.isChecked =currentSiteKey.isHasSpecialChars;
             }
              currentSiteKey.isHasUpperCase.let{
                  addUpperCaseTabCheckBox!!.isChecked =currentSiteKey.isHasUpperCase;
             }
             maxLengthTabCheckBox!!.isChecked = currentSiteKey.maxLength > 0
-            multiHashCheckBox!!.isChecked = multiHashCount > 0
+            multiHashCheckBox!!.isChecked = multiHashIsOn
             addCharsTabCheckBox!!.jumpDrawablesToCurrentState()
             addUpperCaseTabCheckBox!!.jumpDrawablesToCurrentState()
             maxLengthTabCheckBox!!.jumpDrawablesToCurrentState()
+
             if (currentSiteKey.maxLength > 0) {
                 maxLengthTabEditText!!.setText("${currentSiteKey.maxLength}")
             }
@@ -300,12 +298,16 @@ class MainActivity : AppCompatActivity() {
                     addCharsTabCheckBox = settingsView!!.findViewById(R.id.addCharsTabCheckBox) as CheckBox
                     maxLengthTabCheckBox = settingsView!!.findViewById(R.id.maxLengthTabCheckBox) as CheckBox
                     maxLengthTabEditText = settingsView!!.findViewById(R.id.maxLengthTabEditText) as EditText
+                    multiHashCheckBox = settingsView!!.findViewById(R.id.multiHashCheckBox) as CheckBox
+                    hashCountEdit = settingsView!!.findViewById(R.id.hashCountEdit) as EditText
                 }
                 2 -> {
                     addUpperCaseTabCheckBox = rootView!!.findViewById(R.id.addUCaseTabCheckBox) as CheckBox
                     addCharsTabCheckBox = rootView!!.findViewById(R.id.addCharsTabCheckBox) as CheckBox
                     maxLengthTabCheckBox = rootView!!.findViewById(R.id.maxLengthTabCheckBox) as CheckBox
                     maxLengthTabEditText = rootView!!.findViewById(R.id.maxLengthTabEditText) as EditText
+                    multiHashCheckBox = rootView!!.findViewById(R.id.multiHashCheckBox) as CheckBox
+                    hashCountEdit = rootView!!.findViewById(R.id.hashCountEdit) as EditText
                 }
             }
             if (currentSiteKey != null) {
@@ -319,9 +321,15 @@ class MainActivity : AppCompatActivity() {
                     maxLengthTabCheckBox!!.isChecked = currentSiteKey!!.maxLength > 0
                 }
             }
+            multiHashIsOn = loadMultiHashStateFromPrefs()
+            multiHashCount = loadMultiHashCountFromPrefs()
+            (hashCountEdit as TextView).text = multiHashCount.toString()
+            multiHashCheckBox!!.isChecked = multiHashIsOn
+            multiHashCheckBox!!.jumpDrawablesToCurrentState()
             addCharsTabCheckBox!!.jumpDrawablesToCurrentState()
             addUpperCaseTabCheckBox!!.jumpDrawablesToCurrentState()
             maxLengthTabCheckBox!!.jumpDrawablesToCurrentState()
+
         }
 
         override fun onPause() {
@@ -349,6 +357,8 @@ class MainActivity : AppCompatActivity() {
                     maxLengthTabEditText = settingsView!!.findViewById(R.id.maxLengthTabEditText) as EditText
                     importSiteKeysButton = settingsView!!.findViewById(R.id.importSiteKeysButton) as Button
                     exportSiteKeysButton = settingsView!!.findViewById(R.id.exportSiteKeysButton) as Button
+                    multiHashCheckBox = settingsView!!.findViewById(R.id.multiHashCheckBox) as CheckBox
+                    hashCountEdit = settingsView!!.findViewById(R.id.hashCountEdit) as EditText
                 }
                 2 -> {
                     addUpperCaseTabCheckBox = rootView!!.findViewById(R.id.addUCaseTabCheckBox) as CheckBox
@@ -357,6 +367,8 @@ class MainActivity : AppCompatActivity() {
                     maxLengthTabEditText = rootView!!.findViewById(R.id.maxLengthTabEditText) as EditText
                     importSiteKeysButton = rootView!!.findViewById(R.id.importSiteKeysButton) as Button
                     exportSiteKeysButton = rootView!!.findViewById(R.id.exportSiteKeysButton) as Button
+                    multiHashCheckBox = rootView!!.findViewById(R.id.multiHashCheckBox) as CheckBox
+                    hashCountEdit = rootView!!.findViewById(R.id.hashCountEdit) as EditText
                 }
             }
             if (currentSiteKey != null) {
@@ -370,9 +382,16 @@ class MainActivity : AppCompatActivity() {
                     maxLengthTabCheckBox!!.isChecked = currentSiteKey!!.maxLength > 0
                 }
             }
+
+            multiHashIsOn = loadMultiHashStateFromPrefs()
+            multiHashCount = loadMultiHashCountFromPrefs()
+            (hashCountEdit as TextView).text = multiHashCount.toString()
+            multiHashCheckBox!!.isChecked = multiHashIsOn
+            multiHashCheckBox!!.jumpDrawablesToCurrentState()
             addCharsTabCheckBox!!.jumpDrawablesToCurrentState()
             addUpperCaseTabCheckBox!!.jumpDrawablesToCurrentState()
             maxLengthTabCheckBox!!.jumpDrawablesToCurrentState()
+
         }
 
         override fun onCreateView(
@@ -403,7 +422,8 @@ class MainActivity : AppCompatActivity() {
                     val deleteSiteButton = rootView!!.findViewById(R.id.deleteSite) as Button
                     val addSiteButton = rootView!!.findViewById(R.id.addSite) as Button
                     loadSitesFromPrefs(rootView!!)
-                    multiHashCount = loadMultiHashFromPrefs()
+                    multiHashCount = loadMultiHashCountFromPrefs()
+                    multiHashIsOn = loadMultiHashStateFromPrefs()
                     siteSpinner!!.adapter = spinnerAdapter
 
                     settingsView = inflater.inflate(R.layout.fragment_settings, container, false)
@@ -569,7 +589,7 @@ class MainActivity : AppCompatActivity() {
                     sendEnterCheckbox.isChecked = true
                     maxLengthTabEditText!!.setText("32")
                     addUpperCaseTabCheckBox!!.requestFocus()
-                    hashCountEdit!!.setFilters(arrayOf<InputFilter>(InputFilterMinMax(1, 500)))
+                    hashCountEdit!!.setFilters(arrayOf<InputFilter>(InputFilterMinMax(0, 500)))
                     importSiteKeysButton!!.setOnClickListener {
                         Log.d("MainActivity", "import button clicked!")
                         displayImportDialog()
@@ -578,6 +598,18 @@ class MainActivity : AppCompatActivity() {
                     exportSiteKeysButton!!.setOnClickListener {
                         Log.d("MainActivity", "export button clicked!")
                         displayExportDialog()
+                    }
+
+                    multiHashCheckBox!!.setOnClickListener {
+                        if (multiHashCheckBox!!.isChecked){
+                            // set userprevs value to value of edittext
+                            SaveMultiHashToPrefs(hashCountEdit!!.text.toString().toInt(),true)
+
+                        }
+                        else{
+                            // set userprefs value to 0
+                            SaveMultiHashToPrefs(hashCountEdit!!.text.toString().toInt(),false)
+                        }
                     }
 
                     sendEnterCheckbox.setOnClickListener {
@@ -677,6 +709,28 @@ class MainActivity : AppCompatActivity() {
 
                         override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
 
+                        }
+
+                    })
+                    hashCountEdit!!.addTextChangedListener(object : TextWatcher {
+                        override fun afterTextChanged(s: Editable) {
+
+                        }
+
+                        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+                            // TODO Auto-generated method stub
+
+                        }
+
+                        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                            // if there are no chars in the edittext then we save a 0 value
+                            if (s.isNullOrEmpty()){
+                                SaveMultiHashToPrefs(0, multiHashIsOn)
+
+                                return
+                            }
+                            Log.d("MainActivity", "${s}")
+                            SaveMultiHashToPrefs(s.toString().toInt(), multiHashIsOn)
                         }
 
                     })
@@ -1042,6 +1096,17 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+        fun SaveMultiHashToPrefs(hashCount: Int, multiHashCheckedState: Boolean){
+            val hashCountPref = MainActivity.appContext!!.getSharedPreferences("multiHashCount", Context.MODE_PRIVATE)
+            var edit = hashCountPref.edit()
+            edit.putInt("multiHashCount",hashCount).apply()
+            edit.commit()
+            val multiHashIsOn = MainActivity.appContext!!.getSharedPreferences("multiHashIsOn", Context.MODE_PRIVATE)
+            edit = multiHashIsOn.edit()
+            edit.putBoolean("multiHashIsOn",multiHashCheckedState)
+            edit.commit()
+        }
+
         companion object {
             /**
              * The fragment argument representing the section number for this
@@ -1078,10 +1143,14 @@ class MainActivity : AppCompatActivity() {
                 return fragment
             }
 
-            fun loadMultiHashFromPrefs(): Int{
+            fun loadMultiHashCountFromPrefs(): Int{
                 val hashCountPref = MainActivity.appContext!!.getSharedPreferences("multiHashCount", Context.MODE_PRIVATE)
-                val hashCount = hashCountPref.getString("multiHashCount", "0")
-                return hashCount!!.toInt()
+                return hashCountPref.getInt("multiHashCount", 0)
+            }
+
+            fun loadMultiHashStateFromPrefs(): Boolean{
+                val hashCountPref = MainActivity.appContext!!.getSharedPreferences("multiHashIsOn", Context.MODE_PRIVATE)
+                return hashCountPref.getBoolean("multiHashIsOn", false)
             }
             fun loadSitesFromPrefs(vx: View) {
                 Log.d("MainActivity", "Loading sites from preferences")
@@ -1185,6 +1254,7 @@ class MainActivity : AppCompatActivity() {
         private var allSiteKeys: MutableList<SiteKey>? = mutableListOf<SiteKey>()
         var currentSiteKey: SiteKey = SiteKey("")
         var multiHashCount: Int = 0
+        var multiHashIsOn: Boolean = false
 
         fun saveUserPrefValues() {
             val sites = MainActivity.appContext!!.getSharedPreferences("sites", Context.MODE_PRIVATE)

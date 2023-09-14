@@ -196,7 +196,7 @@ class GridView(private val _context: Context) : View(_context) {
         var sb = GenHashFromString(text)
         var count = 1;
         Log.d("MainActivity", "sb 1 => ${sb.toString()}")
-        while (count < 501){
+        while (count < 1){
             sb = GenHashFromString("${userPath.PointValue}" + sb.toString())
             Log.d("MainActivity", "sb 2 => ${sb.toString()}")
             count++;
