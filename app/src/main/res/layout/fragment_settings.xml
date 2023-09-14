@@ -72,12 +72,12 @@ android:orientation="vertical">
                 android:text="Use Multi-Hash" />
 
         <EditText
-                android:id="@+id/maxHashCount"
+                android:id="@+id/hashCountEdit"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight=".4"
                 android:inputType="number"
-                android:text="0" />
+                android:text="10" />
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
