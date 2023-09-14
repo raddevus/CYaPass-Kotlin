@@ -17,7 +17,7 @@ import java.util.*
 /**
  * Created by roger.deutsch on 6/7/2016.
  */
-class GridView(private val _context: Context) : View(_context) {
+class GridView(private val _context: Context, multiHashCount: Int, multiHashIsOn: Boolean) : View(_context) {
 
     private var _allPosts: MutableList<Point>? = null
     private var centerPoint: Int = 0
@@ -35,6 +35,8 @@ class GridView(private val _context: Context) : View(_context) {
     internal var numOfCells = 5
     var cellSize: Int = 0 //125
     var vx: View
+    var multiHashIsOn: Boolean
+    var multiHashCount: Int
 
     var ClearTextPwd : String = ""
         get() = this.clearTextPwd
@@ -65,6 +67,9 @@ class GridView(private val _context: Context) : View(_context) {
         Log.d("MainActivity", "viewHeight : $viewHeight")
 
         vx = this.rootView
+
+        this.multiHashCount = multiHashCount
+        this.multiHashIsOn = multiHashIsOn
 
         Log.d("MainActivity", "id: " + vx.id.toString())
         //postWidth = ((viewWidth / 2) / 6) /5;
@@ -160,8 +165,22 @@ class GridView(private val _context: Context) : View(_context) {
         return true
     }
 
-    fun generatePassword() {
-        createHash()
+    fun generatePassword(multiHashIsOn: Boolean, multiHashCount:Int) {
+        if (!multiHashIsOn){
+            createHash(0)
+        }
+        else {
+            createHash(multiHashCount)
+        }
+    }
+
+    private fun generatePassword(){
+        if (!multiHashIsOn){
+            createHash(0)
+        }
+        else {
+            createHash(multiHashCount)
+        }
     }
 
     private fun generateAllPosts() {
@@ -177,7 +196,7 @@ class GridView(private val _context: Context) : View(_context) {
     }
 
     //@TargetApi(19)
-    private fun createHash() {
+    private fun createHash(multiHashCount: Int) {
         //String site = MainActivity.siteKey.getText().toString();  //"amazon";
         if (MainActivity.currentSiteKey.key == "") {
             MainActivity.SetPassword("")
@@ -194,12 +213,12 @@ class GridView(private val _context: Context) : View(_context) {
         this.clearTextPwd = text
         Log.d("MainActivity", "clearTextPwd: ${this.clearTextPwd}")
         var sb = GenHashFromString(text)
-        var count = 1;
+        var loopCount = 0;
         Log.d("MainActivity", "sb 1 => ${sb.toString()}")
-        while (count < 1){
+        while (loopCount < multiHashCount){
             sb = GenHashFromString("${userPath.PointValue}" + sb.toString())
             Log.d("MainActivity", "sb 2 => ${sb.toString()}")
-            count++;
+            loopCount++;
         }
             if (currentSiteKey.isHasSpecialChars) {
                 // yes, I still get the special chars from what the user typed on the form

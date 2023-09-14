@@ -343,7 +343,7 @@ class MainActivity : AppCompatActivity() {
         override fun onResume() {
             super.onResume()
             if (gv == null) {
-                gv = GridView(appContext!!)
+                gv = GridView(appContext!!, multiHashCount, multiHashIsOn)
             }
             if (up != null) {
                 gv!!.userPath = up!!
@@ -400,7 +400,7 @@ class MainActivity : AppCompatActivity() {
         ): View? {
 
             //final GridView gv = new us.raddev.com.cyapass.cyapass.GridView(rootView.getContext());
-            gv = app.actionmobile.cyapass.GridView(appContext!!)
+            gv = app.actionmobile.cyapass.GridView(appContext!!, multiHashCount, multiHashIsOn)
 
             rootView = inflater.inflate(R.layout.fragment_main, container, false)
 
@@ -474,7 +474,7 @@ class MainActivity : AppCompatActivity() {
                             }
                             maxLengthTabCheckBox!!.isChecked = currentSiteKey!!.maxLength > 0
                             if (gv!!.isLineSegmentComplete) {
-                                gv!!.generatePassword()
+                                gv!!.generatePassword(multiHashIsOn, multiHashCount)
                             }
                         }
 
@@ -604,12 +604,14 @@ class MainActivity : AppCompatActivity() {
                         if (multiHashCheckBox!!.isChecked){
                             // set userprevs value to value of edittext
                             SaveMultiHashToPrefs(hashCountEdit!!.text.toString().toInt(),true)
-
                         }
                         else{
                             // set userprefs value to 0
                             SaveMultiHashToPrefs(hashCountEdit!!.text.toString().toInt(),false)
                         }
+                        multiHashIsOn = loadMultiHashStateFromPrefs()
+                        multiHashCount = loadMultiHashCountFromPrefs()
+                        gv!!.generatePassword(multiHashIsOn, multiHashCount)
                     }
 
                     sendEnterCheckbox.setOnClickListener {
@@ -637,7 +639,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         if (gv!!.isLineSegmentComplete) {
                             Log.d("MainActivity", "addChars -- Re-generating password...")
-                            gv!!.generatePassword()
+                            gv!!.generatePassword(multiHashIsOn, multiHashCount)
                         }
                     }
 
@@ -649,7 +651,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         if (gv!!.isLineSegmentComplete) {
                             Log.d("MainActivity", "addChars -- Re-generating password...")
-                            gv!!.generatePassword()
+                            gv!!.generatePassword(multiHashIsOn, multiHashCount)
                         }
                     }
 
@@ -664,7 +666,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         if (gv!!.isLineSegmentComplete) {
                             Log.d("MainActivity", "addChars -- Re-generating password...")
-                            gv!!.generatePassword()
+                            gv!!.generatePassword(multiHashIsOn, multiHashCount)
                         }
                     })
 
@@ -675,7 +677,7 @@ class MainActivity : AppCompatActivity() {
                             }
                             MainActivity.specialChars = s.toString()
                             if (currentSiteKey!!.isHasSpecialChars) {
-                                gv!!.generatePassword()
+                                gv!!.generatePassword(multiHashIsOn, multiHashCount)
                             }
                         }
 
@@ -695,7 +697,7 @@ class MainActivity : AppCompatActivity() {
                                 if (s.length > 0) {
                                     MainActivity.maxLength = Integer.parseInt(s.toString())
                                     if (isMaxLength) {
-                                        gv!!.generatePassword()
+                                        gv!!.generatePassword(multiHashIsOn, multiHashCount)
                                     }
                                 }
 
@@ -726,11 +728,13 @@ class MainActivity : AppCompatActivity() {
                             // if there are no chars in the edittext then we save a 0 value
                             if (s.isNullOrEmpty()){
                                 SaveMultiHashToPrefs(0, multiHashIsOn)
-
-                                return
                             }
-                            Log.d("MainActivity", "${s}")
-                            SaveMultiHashToPrefs(s.toString().toInt(), multiHashIsOn)
+                            else {
+                                SaveMultiHashToPrefs(s.toString().toInt(), multiHashIsOn)
+                            }
+                            multiHashIsOn = loadMultiHashStateFromPrefs()
+                            multiHashCount = loadMultiHashCountFromPrefs()
+                            gv!!.generatePassword(multiHashIsOn, multiHashCount)
                         }
 
                     })
@@ -750,7 +754,7 @@ class MainActivity : AppCompatActivity() {
             var secretId = v.findViewById(R.id.cyaSecretId) as EditText
 
             // Force regeneration of password to insure all changes user has made are applied.
-            gv!!.generatePassword()
+            gv!!.generatePassword(multiHashIsOn, multiHashCount)
             var currentPwd : String = gv!!.ClearTextPwd
             if (currentPwd == ""){
                 Toast.makeText(context,"Please set a valid Password (pattern & sitekey), used to encrypt your data, & try again.",Toast.LENGTH_LONG).show()
@@ -875,7 +879,7 @@ class MainActivity : AppCompatActivity() {
             val queue = Volley.newRequestQueue(context)
 
             // Force regeneration of password to insure all changes user has made are applied.
-            gv!!.generatePassword()
+            gv!!.generatePassword(multiHashIsOn, multiHashCount)
             var currentPwd : String = gv!!.ClearTextPwd
             if (currentPwd == ""){
                 Toast.makeText(context,"Please set a valid Password (pattern & sitekey), used to encrypt your data, & try again.",Toast.LENGTH_LONG).show()
