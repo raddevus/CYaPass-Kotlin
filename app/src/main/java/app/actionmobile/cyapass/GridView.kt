@@ -35,8 +35,6 @@ class GridView(private val _context: Context, multiHashCount: Int, multiHashIsOn
     internal var numOfCells = 5
     var cellSize: Int = 0 //125
     var vx: View
-    var multiHashIsOn: Boolean
-    var multiHashCount: Int
 
     var ClearTextPwd : String = ""
         get() = this.clearTextPwd
@@ -68,8 +66,8 @@ class GridView(private val _context: Context, multiHashCount: Int, multiHashIsOn
 
         vx = this.rootView
 
-        this.multiHashCount = multiHashCount
-        this.multiHashIsOn = multiHashIsOn
+        GridView.multiHashCount = multiHashCount
+        GridView.multiHashIsOn = multiHashIsOn
 
         Log.d("MainActivity", "id: " + vx.id.toString())
         //postWidth = ((viewWidth / 2) / 6) /5;
@@ -373,5 +371,7 @@ class GridView(private val _context: Context, multiHashCount: Int, multiHashIsOn
 
         var userPath = UserPath
         private var isPatternHidden: Boolean = false
+        var multiHashIsOn: Boolean = false
+        var multiHashCount: Int = 0
     }
 }

@@ -399,6 +399,8 @@ class MainActivity : AppCompatActivity() {
             savedInstanceState: Bundle?
         ): View? {
 
+            multiHashIsOn = loadMultiHashStateFromPrefs()
+            multiHashCount = loadMultiHashCountFromPrefs()
             //final GridView gv = new us.raddev.com.cyapass.cyapass.GridView(rootView.getContext());
             gv = app.actionmobile.cyapass.GridView(appContext!!, multiHashCount, multiHashIsOn)
 
@@ -611,6 +613,8 @@ class MainActivity : AppCompatActivity() {
                         }
                         multiHashIsOn = loadMultiHashStateFromPrefs()
                         multiHashCount = loadMultiHashCountFromPrefs()
+                        GridView.multiHashIsOn = multiHashIsOn
+                        GridView.multiHashCount = multiHashCount
                         gv!!.generatePassword(multiHashIsOn, multiHashCount)
                     }
 
@@ -734,6 +738,8 @@ class MainActivity : AppCompatActivity() {
                             }
                             multiHashIsOn = loadMultiHashStateFromPrefs()
                             multiHashCount = loadMultiHashCountFromPrefs()
+                            GridView.multiHashIsOn = multiHashIsOn
+                            GridView.multiHashCount = multiHashCount
                             gv!!.generatePassword(multiHashIsOn, multiHashCount)
                         }
 
